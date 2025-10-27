@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kasyno Projekt</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header id="main-header" class="hidden">
+        <div id="user-info">
+            Witaj, <span id="username-display"></span> | 
+            Kasa: <span id="money-display"></span>
+        </div>
+        <nav id="main-nav">
+            <button data-view="main-menu">Menu Główne</button>
+            <button id="logout-button">Wyloguj</button>
+        </nav>
+    </header>
+
+    <main>
+        <section id="login-view" class="view active">
+            <h2>Zaloguj się</h2>
+            <input type="text" id="username-input" placeholder="Login">
+            <button id="login-button">Zaloguj</button>
+        </section>
+
+        <section id="main-menu-view" class="view hidden">
+            <h2>Wybierz Grę</h2>
+            <button class="game-button" data-view="slot-game">Automaty</button>
+            <button class="game-button" data-view="blackjack-game">Blackjack</button>
+        </section>
+
+        <section id="slot-game-view" class="view hidden">
+            <h2>Gra - Automat 🎰</h2>
+            
+            <div id="slot-machine">
+                <div class="reel" id="reel1">🍒</div>
+                <div class="reel" id="reel2">🍋</div>
+                <div class="reel" id="reel3">🔔</div>
+            </div>
+            
+            <div id="slot-controls">
+                <label for="bet-amount">Zakład:</label>
+                <input type="number" id="bet-amount" value="10" min="1">
+                <button id="spin-button">Zakręć!</button>
+            </div>
+            
+            <p id="slot-result-message"></p>
+        </section>
+        
+    </main> <script src="js/ui.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/games/slot.js"></script>
+
+</body>
+</html>

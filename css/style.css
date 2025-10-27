@@ -1,0 +1,215 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: #f0f0f0;
+}
+
+/* Klasy do zarządzania widokami */
+.view {
+    padding: 20px;
+    border: 1px solid #ccc;
+    margin-top: 20px;
+}
+
+.hidden {
+    display: none;
+}
+
+.active {
+    display: block; /* Lub display: flex, grid itp. */
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+}
+
+#slot-machine {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.reel {
+    font-size: 3rem;
+    padding: 20px;
+    border: 2px solid #555;
+    background: white;
+    width: 80px;
+    height: 80px;
+    margin: 0 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Ważne: dodaj płynne przejście, gdy animacja się kończy */
+    transition: filter 0.3s ease-out, transform 0.3s ease-out;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* To jest KLUCZ do animacji CSS! 
+  Te style zostaną zastosowane tylko wtedy, gdy bęben ma klasę .spinning
+*/
+.reel.spinning {
+    /* 1. Rozmycie symulujące ruch */
+    filter: blur(3px);
+    
+    /* 2. Lekkie trzęsienie góra-dół */
+    animation: shake 0.08s linear infinite;
+    
+    /* 3. Dodatkowe efekty wizualne */
+    background: linear-gradient(45deg, #ffeb3b, #ff9800);
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
+}
+
+/* Definicja animacji "trzęsienia" */
+@keyframes shake {
+    0% {
+        transform: translateY(-3px) rotate(-1deg);
+    }
+    25% {
+        transform: translateY(3px) rotate(1deg);
+    }
+    50% {
+        transform: translateY(-2px) rotate(-0.5deg);
+    }
+    75% {
+        transform: translateY(2px) rotate(0.5deg);
+    }
+    100% {
+        transform: translateY(-3px) rotate(-1deg);
+    }
+}
+
+/* Animacja wygranej */
+.reel.win {
+    animation: winPulse 0.6s ease-in-out;
+    background: linear-gradient(45deg, #4caf50, #8bc34a);
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
+}
+
+@keyframes winPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Style dla reszty interfejsu */
+
+#slot-controls {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+#slot-controls label {
+    font-weight: bold;
+    color: #333;
+}
+
+#slot-controls input {
+    padding: 8px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    width: 80px;
+    text-align: center;
+}
+
+#slot-controls button {
+    padding: 10px 20px;
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#slot-controls button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+#slot-controls button:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+#slot-result-message {
+    font-size: 18px;
+    font-weight: bold;
+    margin-top: 15px;
+    min-height: 25px;
+    color: #333;
+}
+
+.game-button {
+    padding: 15px 30px;
+    margin: 10px;
+    background: linear-gradient(45deg, #4ecdc4, #44a08d);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.game-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+}
+
+#main-menu-view {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+#login-view {
+    text-align: center;
+    padding: 40px 20px;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+#login-view input {
+    padding: 12px;
+    margin: 10px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    width: 200px;
+    font-size: 16px;
+}
+
+#login-view button {
+    padding: 12px 25px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#login-view button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
