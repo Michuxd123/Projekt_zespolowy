@@ -1,45 +1,71 @@
-// Zaimportuj funkcje z innych plików (jeśli używacie modułów ES6)
-// import { showView, updateHeader } from './ui.js';
-// import { setPlayer, getPlayer } from './state.js';
+// Plik: js/auth.js
+// Minimalny, stabilny login oparty o moduły UI + Firebase
 
-// Uwaga: Bez modułów ES6, musicie uważać na kolejność ładowania skryptów w HTML!
+import { auth, signInAnonymously, onAuthStateChanged, signOut } from './firebaseConfig.js';
+import * as UI from './ui.js';
+import { saveScore, renderLeaderboard } from './leaderboard.js';
 
-document.getElementById('login-button').addEventListener('click', () => {
-    const username = document.getElementById('username-input').value;
-    
-    if (username) {
-        // Zapisz gracza i daj mu startową kasę (np. z state.js)
-        const startMoney = 1000;
-        // setPlayer(username, startMoney); // funkcja z state.js
-        
-        // Zapisz w localStorage (prosta wersja)
-        localStorage.setItem('casinoUser', JSON.stringify({ name: username, money: startMoney }));
+document.addEventListener('DOMContentLoaded', () => {
+    const loginBtn = document.getElementById('login-button');
+    const logoutBtn = document.getElementById('logout-button');
 
-        // Zaktualizuj UI
-        updateHeader(username, startMoney); // funkcja z ui.js
-        showView('main-menu-view'); // funkcja z ui.js
+    if (loginBtn) {
+        loginBtn.addEventListener('click', async () => {
+            const nickname = document.getElementById('username-input').value?.trim();
+            if (!nickname) return;
+            try {
+                const cred = await signInAnonymously(auth);
+                const uid = cred.user.uid;
+                const startMoney = 1000;
+                localStorage.setItem('casinoUser', JSON.stringify({ uid, name: nickname, money: startMoney }));
+                await saveScore(uid, nickname, startMoney);
+                UI.updateHeader(nickname, startMoney);
+                UI.showView('post-login-menu-view');
+            } catch (e) {
+                console.error(e);
+                const err = document.getElementById('login-error');
+                let msg = 'Logowanie nie powiodło się.';
+                if (e && e.code === 'auth/operation-not-allowed') {
+                    msg = 'Anonimowe logowanie jest wyłączone w Firebase.';
+                } else if (e && e.code === 'auth/network-request-failed') {
+                    msg = 'Błąd sieci. Uruchom stronę przez lokalny serwer.';
+                }
+                if (err) err.textContent = msg;
+            }
+        });
     }
-});
 
-// Obsługa nawigacji w menu
-document.querySelectorAll('#main-nav button, .game-button').forEach(button => {
-    button.addEventListener('click', () => {
-        const viewName = button.getAttribute('data-view');
-        if (viewName) {
-            showView(viewName + '-view');
+    document.querySelectorAll('#main-nav button, .game-button, .nav-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const viewName = button.getAttribute('data-view');
+            if (viewName) {
+                UI.showView(viewName + '-view');
+                if (viewName === 'leaderboard') {
+                    renderLeaderboard();
+                }
+            }
+        });
+    });
+
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            try { await signOut(auth); } catch (_) {}
+            localStorage.removeItem('casinoUser');
+            UI.updateHeader(null, 0);
+            UI.showView('login-view');
+            const input = document.getElementById('username-input');
+            if (input) input.value = '';
+        });
+    }
+
+    onAuthStateChanged(auth, (user) => {
+        const stored = JSON.parse(localStorage.getItem('casinoUser') || 'null');
+        if (user && stored && stored.uid === user.uid) {
+            UI.updateHeader(stored.name, stored.money);
+            UI.showView('post-login-menu-view');
+        } else {
+            UI.updateHeader(null, 0);
+            UI.showView('login-view');
         }
     });
-});
-
-// Obsługa przycisku wylogowania
-document.getElementById('logout-button').addEventListener('click', () => {
-    // Wyczyść dane gracza z localStorage
-    localStorage.removeItem('casinoUser');
-    
-    // Ukryj header i pokaż ekran logowania
-    updateHeader(null, 0);
-    showView('login-view');
-    
-    // Wyczyść pole logowania
-    document.getElementById('username-input').value = '';
 });

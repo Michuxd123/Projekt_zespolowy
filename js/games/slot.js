@@ -1,4 +1,8 @@
 // Definicja symboli i ich wartości (im rzadszy, tym wyższa wygrana)
+
+import { saveScore } from '../leaderboard.js';
+import { updateHeader } from '../ui.js'
+
 const symbols = ['🍒', '🍋', '🔔', '🍉', '7️⃣'];
 const payouts = {
     '🍒': 2,
@@ -61,6 +65,12 @@ function spin() {
             messageEl.textContent = `Wygrałeś ${winnings}!`;
             playerData.money += winnings;
             showWinAnimation();
+        
+            // Aktualizuj maksymalny wynik (maxScore) w Firestore
+            if (playerData.uid && playerData.name) {
+                saveScore(playerData.uid, playerData.name, playerData.money);
+            }
+        
         } else {
             messageEl.textContent = "Próbuj dalej!";
         }

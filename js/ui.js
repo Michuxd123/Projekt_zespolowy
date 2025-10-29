@@ -1,12 +1,12 @@
+// Plik: js/ui.js
+
 // Funkcja, która ukrywa wszystkie widoki i pokazuje jeden wskazany
-function showView(viewId) {
-    // Ukryj wszystkie sekcje .view
+export function showView(viewId) {
     document.querySelectorAll('.view').forEach(view => {
         view.classList.add('hidden');
         view.classList.remove('active');
     });
 
-    // Pokaż tylko wybrany widok
     const targetView = document.getElementById(viewId);
     if (targetView) {
         targetView.classList.remove('hidden');
@@ -14,8 +14,8 @@ function showView(viewId) {
     }
 }
 
-// Funkcja do aktualizowania paska z kasą
-function updateHeader(username, money) {
+// 👇 DODAJ 'export'
+export function updateHeader(username, money) {
     const header = document.getElementById('main-header');
     if (username) {
         header.classList.remove('hidden');
@@ -25,3 +25,11 @@ function updateHeader(username, money) {
         header.classList.add('hidden');
     }
 }
+
+// Upewnij się, że funkcje są też dostępne globalnie (jeśli gdzieś wywołano je bez importu)
+// To obejście błędu "updateHeader is not defined" przy starych skryptach w cache
+// Nie wpływa na działanie modułów ESM.
+// eslint-disable-next-line no-undef
+window.showView = window.showView || showView;
+// eslint-disable-next-line no-undef
+window.updateHeader = window.updateHeader || updateHeader;
