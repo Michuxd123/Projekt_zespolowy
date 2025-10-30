@@ -1,16 +1,20 @@
-// Definicja symboli i ich wartości (im rzadszy, tym wyższa wygrana)
+// Plik: js/games/slot.js
 
 import { saveScore } from '../leaderboard.js';
-import { updateHeader } from '../ui.js'
+import { updateHeader } from '../ui.js';
 
-const symbols = ['🍒', '🍋', '🔔', '🍉', '7️⃣'];
-const payouts = {
-    '🍒': 2,
-    '🍋': 3,
-    '🔔': 5,
-    '🍉': 10,
-    '7️⃣': 50 
-};
+// Definicja symboli (zgodnie z poprzednią sugestią, aby diament był rzadki)
+const symbols = [
+    '🍒','🍒','🍒','🍒','🍒', // 5x
+    '🍋','🍋', '🍋', '🍋',   // 4x
+    '🔔','🔔', '🔔',         // 3x
+    '🍉','🍉',             // 2x
+    '7️⃣',                  // 1x
+    '💎'                   // 1x
+];
+
+// Stary obiekt 'payouts' nie jest już potrzebny, 
+// nowa logika wygranych jest poniżej w 'checkWinnings'
 
 // Referencje do elementów HTML
 const reel1 = document.getElementById('reel1');
@@ -29,6 +33,10 @@ function spin() {
     const bet = parseInt(betInput.value);
 
     // 2. Sprawdź, czy gracza stać na zakład
+    if (bet <= 0) {
+        messageEl.textContent = "Musisz postawić zakład!";
+        return;
+    }
     if (playerData.money < bet) {
         messageEl.textContent = "Nie masz wystarczająco pieniędzy!";
         return;
@@ -43,6 +51,7 @@ function spin() {
     startSpinningAnimation();
 
     // 5. Losowanie wyników
+    // Używamy losowania opartego na tablicy 'symbols'
     const result1 = symbols[Math.floor(Math.random() * symbols.length)];
     const result2 = symbols[Math.floor(Math.random() * symbols.length)];
     const result3 = symbols[Math.floor(Math.random() * symbols.length)];
@@ -126,33 +135,30 @@ function showWinAnimation() {
     }, 600);
 }
 
+// --- NOWA FUNKCJA checkWinnings ---
+// Zawiera logikę, o którą prosiłeś
 function checkWinnings(results, bet) {
     const [r1, r2, r3] = results;
 
-    // Najlepsza wygrana: trzy takie same symbole
+    // 1. Trzy takie same
     if (r1 === r2 && r2 === r3) {
-        return bet * payouts[r1];
-    }
-    
-    // Wygraj za dwa takie same symbole (mniejsza wygrana)
-    if (r1 === r2 || r2 === r3 || r1 === r3) {
-        // Znajdź który symbol się powtarza
-        const matchingSymbol = r1 === r2 ? r1 : (r2 === r3 ? r2 : r1);
-        return Math.floor(bet * payouts[matchingSymbol] * 0.3); // 30% wartości symbolu
-    }
-    
-    // Specjalna wygrana za sekwencję (np. 7️⃣-🔔-🍉)
-    const specialSequences = [
-        ['7️⃣', '🔔', '🍉'],
-        ['🍉', '🔔', '7️⃣']
-    ];
-    
-    for (const sequence of specialSequences) {
-        if (r1 === sequence[0] && r2 === sequence[1] && r3 === sequence[2]) {
-            return bet * 5; // Stała wygrana za sekwencję
+        switch (r1) {
+            case '🍒': return bet * 4;   // 3 wiśnie
+            case '🍋': return bet * 4;   // 3 cytryny
+            case '🍉': return bet * 16;  // 3 arbuzy
+            case '🔔': return bet * 20;  // 3 dzwonki
+            case '7️⃣': return bet * 50; // 3 siódemki
+            case '💎': return bet * 4;   // 3 diamenty
+            default: return 0;
         }
     }
-    
-    // Brak wygranej
+
+    // 2. Dokładnie dwa diamenty, trzeci inny
+    const diamondCount = results.filter(s => s === '💎').length;
+    if (diamondCount === 2) {
+        return bet * 2;
+    }
+
+    // 3. Brak wygranej
     return 0;
 }
