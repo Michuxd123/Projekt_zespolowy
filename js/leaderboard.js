@@ -4,7 +4,7 @@
 import { db } from './firebaseConfig.js';
 // Importy Firestore (CDN ESM)
 // POPRAWKA: Usunięto zduplikowaną i błędną linię "mport..."
-import { doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { doc, getDoc, setDoc, collection, query, orderBy, limit, getDocs, where } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const USERS_COLLECTION = 'users'; // Dane użytkowników z maxScore
 
