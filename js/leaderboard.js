@@ -43,6 +43,7 @@ export async function saveScore(uid, nickname, newScore) {
 export async function getLeaderboard() {
   const q = query(
     collection(db, USERS_COLLECTION),
+    where('maxScore', '>', 1000),
     orderBy('maxScore', 'desc'),
     limit(10)
   );
