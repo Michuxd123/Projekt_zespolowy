@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kasyno Projekt</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/blackjack.css">
     <script type="importmap">
     {
       "imports": {
@@ -71,6 +72,27 @@
             
             <p id="slot-result-message"></p>
         </section>
+
+        <section id="blackjack-game-view" class="view hidden">
+            <h3>Blackjack ♠️</h3>
+            <h3>Dealer: <span id="dealer-sum"></span></h3>
+            <div id="dealer-cards">
+                <img id="hidden" src="games/blackjack/cards/BACK.png">
+            </div>
+    
+            <h3>Ty: <span id="your-sum"></span></h3>
+            <div id="your-cards"></div>
+    
+            <br>
+            <div class="game-options">
+                <button id="hit" class="btn">Dobierz</button>
+                <button id="stay" class="btn">Stój</button>
+            </div>
+            
+            <p id="results"></p>
+            
+        </section>
+        
         
     </main> 
     
