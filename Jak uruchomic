@@ -1,0 +1,9 @@
+Żeby odpalić serwer do testowania u siebie należy zainstalować node.js 
+Następnie uruchomić terminal windows w folderze z plikami, a potem uruchomić pakiet serwara http komendą
+npx http-server
+Pojawi się adres lokalnego serwera, na którym można testować swoje postępny.
+Gdyby to nie wystarczyło a serwer nie chciał sie uruchomić można też użyc npm install aby zainstalowało wszystkie pakiety, 
+mimo że obecnie uzywane jest tylko firebase-tools.
+Gdyby zmiany nie były widoczne, serwer należy wyłaczyc - ctrl+c w konsoli.
+Wyłączenie konsoli wyłącza też serwer.
+Gdyby dalej bybył jakieś problemy polecam zdetyować jakas czesc odpowiedzialna za wersje w index.html, ewentualnie ctrl+shft+r na stronie.
