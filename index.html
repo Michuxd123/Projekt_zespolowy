@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kasyno Projekt</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/blackjack.css">
+    <link rel="stylesheet" href="css/roulette.css">
     <script type="importmap">
     {
       "imports": {
@@ -45,6 +47,49 @@
             <h2>Wybierz Grę</h2>
             <button class="game-button" data-view="slot-game">Automaty</button>
             <button class="game-button" data-view="blackjack-game">Blackjack</button>
+            <button class="game-button" data-view="roulette-game">Ruletka </button>
+        </section>
+
+        </section>
+        
+        <section id="roulette-game-view" class="view hidden">
+            <h2>Gra - Ruletka </h2>
+
+            <div id="roulette-wheel-area">
+                <p>Wylosowana liczba: <span id="roulette-result-number">...</span></p>
+            </div>
+
+            <div id="roulette-betting-table">
+                
+                <div class="bet-option green" data-bet-type="number" data-bet-value="0">0</div>
+                
+                <div id="roulette-number-grid">
+                    </div>
+
+                <div class="bet-option" data-bet-type="column" data-bet-value="1">Kol. 1</div>
+                <div class="bet-option" data-bet-type="column" data-bet-value="2">Kol. 2</div>
+                <div class="bet-option" data-bet-type="column" data-bet-value="3">Kol. 3</div>
+                
+                <div class="bet-option dozen" data-bet-type="dozen" data-bet-value="1">1st 12</div>
+                <div class="bet-option dozen" data-bet-type="dozen" data-bet-value="2">2nd 12</div>
+                <div class="bet-option dozen" data-bet-type="dozen" data-bet-value="3">3rd 12</div>
+                
+                <div class="bet-option half" data-bet-type="half" data-bet-value="1-18">1-18</div>
+                <div class="bet-option half" data-bet-type="half" data-bet-value="even">PARZYSTE</div>
+                <div class="bet-option half red-bg" data-bet-type="color" data-bet-value="red">CZERWONE</div>
+                <div class="bet-option half black-bg" data-bet-type="color" data-bet-value="black">CZARNE</div>
+                <div class="bet-option half" data-bet-type="half" data-bet-value="odd">NIEPARZYSTE</div>
+                <div class="bet-option half" data-bet-type="half" data-bet-value="19-36">19-36</div>
+            </div>
+
+            <div id="roulette-controls">
+                <label for="roulette-bet-amount">Twój zakład:</label>
+                <input type="number" id="roulette-bet-amount" value="10" min="1">
+                <button id="roulette-spin-button" class="btn">Zakręć!</button>
+                <button id="roulette-clear-bets" class="btn">Wyczyść zakłady</button>
+            </div>
+            
+            <p id="roulette-message"></p>
         </section>
 
         <section id="leaderboard-view" class="view hidden">
@@ -71,6 +116,27 @@
             
             <p id="slot-result-message"></p>
         </section>
+
+        <section id="blackjack-game-view" class="view hidden">
+            <h3>Blackjack ♠️</h3>
+            <h3>Dealer: <span id="dealer-sum"></span></h3>
+            <div id="dealer-cards">
+                <img id="hidden" src="js/games/cards/BACK.png">
+            </div>
+    
+            <h3>Ty: <span id="your-sum"></span></h3>
+            <div id="your-cards"></div>
+    
+            <br>
+            <div class="game-options">
+                <button id="hit" class="btn">Dobierz</button>
+                <button id="stay" class="btn">Stój</button>
+            </div>
+            
+            <p id="results"></p>
+            
+        </section>
+        
         
     </main> 
     
@@ -79,6 +145,8 @@
     <script type="module" src="js/leaderboard.js?v=3"></script>
     <script type="module" src="js/auth.js?v=3"></script>
     <script type="module" src="js/games/slot.js?v=0.2.2"></script>
+    <script type="module" src="js/games/blackjack.js?v=0.4.6"></script>
+    <script type="module" src="js/games/roulette.js?v=0.0.1"></script>
     
 
 </body>
