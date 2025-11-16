@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/blackjack.css">
     <link rel="stylesheet" href="css/roulette.css">
+    <link rel="stylesheet" href="css/slot-machine.css">
     <script type="importmap">
     {
       "imports": {
@@ -100,21 +101,45 @@
         </section>
 
         <section id="slot-game-view" class="view hidden">
-            <h2>Gra - Automat 🎰</h2>
+            <h2>Slot Machine 🎰</h2>
             
-            <div id="slot-machine">
-                <div class="reel" id="reel1">🍒</div>
-                <div class="reel" id="reel2">🍋</div>
-                <div class="reel" id="reel3">🔔</div>
+            <div id="slot-machine-container">
+                <!-- 3x3 Grid -->
+                <div id="slot-grid"></div>
+                
+                <!-- Game Info -->
+                <div id="slot-info">
+                    <div class="slot-info-item">
+                        <span class="slot-info-label">Balance:</span>
+                        <span class="slot-info-value" id="slot-balance">100</span>
+                    </div>
+                    <div class="slot-info-item">
+                        <span class="slot-info-label">Bet per Line:</span>
+                        <span class="slot-info-value" id="slot-bet-per-line">1</span>
+                    </div>
+                    <div class="slot-info-item">
+                        <span class="slot-info-label">Active Paylines:</span>
+                        <span class="slot-info-value" id="slot-paylines">5</span>
+                    </div>
+                </div>
+                
+                <!-- Bet Controls -->
+                <div id="slot-bet-controls">
+                    <h3>Select Bet per Line</h3>
+                    <div class="bet-buttons-container">
+                        <button class="bet-button" data-bet="1">1</button>
+                        <button class="bet-button" data-bet="2">2</button>
+                        <button class="bet-button" data-bet="5">5</button>
+                        <button class="bet-button" data-bet="10">10</button>
+                    </div>
+                </div>
+                
+                <!-- Spin Button -->
+                <button id="slot-spin-button">Spin</button>
+                
+                <!-- Message Display -->
+                <p id="slot-result-message" class="slot-message info"></p>
             </div>
-            
-            <div id="slot-controls">
-                <label for="bet-amount">Zakład:</label>
-                <input type="number" id="bet-amount" value="10" min="1">
-                <button id="spin-button">Zakręć!</button>
-            </div>
-            
-            <p id="slot-result-message"></p>
         </section>
 
         <section id="blackjack-game-view" class="view hidden">
@@ -144,7 +169,7 @@
     <script type="module" src="js/firebaseConfig.js?v=3"></script>
     <script type="module" src="js/leaderboard.js?v=3"></script>
     <script type="module" src="js/auth.js?v=3"></script>
-    <script type="module" src="js/games/slot.js?v=0.2.2"></script>
+    <script type="module" src="js/games/slot-machine.js"></script>
     <script type="module" src="js/games/blackjack.js?v=0.4.6"></script>
     <script type="module" src="js/games/roulette.js?v=0.0.1"></script>
     
