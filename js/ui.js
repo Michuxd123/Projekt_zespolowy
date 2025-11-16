@@ -11,14 +11,6 @@ export function showView(viewId) {
     if (targetView) {
         targetView.classList.remove('hidden');
         targetView.classList.add('active');
-        
-        // Trigger custom event for slot machine initialization
-        if (viewId === 'slot-game-view') {
-            setTimeout(() => {
-                const event = new CustomEvent('slotViewShown');
-                document.dispatchEvent(event);
-            }, 100);
-        }
     }
 }
 
