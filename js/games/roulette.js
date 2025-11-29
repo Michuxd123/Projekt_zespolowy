@@ -1,5 +1,6 @@
 import { saveScore } from '../leaderboard.js';
 import { updateHeader } from '../ui.js';
+import { getUserMoney, updateUserMoney } from '../firebaseConfig.js';
 
 const ROULETTE_NUMBERS = {
     0: 'green',
@@ -128,7 +129,7 @@ function checkWin(winningNumber) {
 }
 
 
-function handleSpin() {
+async function handleSpin() {
     if (isSpinning || !selectedBetDetails) return;
 
     isSpinning = true;
@@ -138,12 +139,31 @@ function handleSpin() {
 
     
     const betAmount = parseInt(betAmountInput.value, 10);
-    let playerData = JSON.parse(localStorage.getItem('casinoUser'));
+    let playerData = null;
+    
+    try {
+        playerData = JSON.parse(localStorage.getItem('casinoUser'));
+    } catch (storageError) {
+        console.warn('Nie można odczytać localStorage:', storageError);
+    }
 
-    if (!playerData) {
-        messageEl.textContent = 'Błąd: Nie można pobrać danych użytkownika z localStorage.';
+    if (!playerData || !playerData.uid) {
+        messageEl.textContent = 'Błąd: Nie można pobrać danych użytkownika. Zaloguj się ponownie.';
         isSpinning = false;
+        spinButton.disabled = false;
+        clearButton.disabled = false;
         return;
+    }
+
+    // Pobierz prawdziwe saldo z Firebase
+    const realMoney = await getUserMoney(playerData.uid);
+    if (realMoney !== null && realMoney !== undefined) {
+        playerData.money = realMoney;
+        try {
+            localStorage.setItem('casinoUser', JSON.stringify(playerData));
+        } catch (storageError) {
+            console.warn('Nie można zapisać do localStorage:', storageError);
+        }
     }
 
     
@@ -156,10 +176,18 @@ function handleSpin() {
     }
 
     
-    playerData.money -= betAmount;
+    const newMoney = playerData.money - betAmount;
     
+    // Zaktualizuj Firebase (źródło prawdy)
+    await updateUserMoney(playerData.uid, newMoney);
     
-    localStorage.setItem('casinoUser', JSON.stringify(playerData));
+    // Zaktualizuj localStorage i UI
+    playerData.money = newMoney;
+    try {
+        localStorage.setItem('casinoUser', JSON.stringify(playerData));
+    } catch (storageError) {
+        console.warn('Nie można zapisać do localStorage:', storageError);
+    }
     updateHeader(playerData.name, playerData.money);
     
     const winningNumber = spinWheel();
@@ -175,17 +203,26 @@ function handleSpin() {
 
     const payoutMultiplier = checkWin(winningNumber);
     
+    let finalMoney = playerData.money;
     if (payoutMultiplier > 0) {
         const winnings = betAmount * payoutMultiplier;
         messageEl.textContent = `Wygrywasz! Trafiono ${winningNumber}. Wygrywasz ${winnings}.`;
-        playerData.money += winnings; 
+        finalMoney += winnings; 
     } else {
         messageEl.textContent = `Przegrana. Wylosowano ${winningNumber}.`;
-        
     }
 
-    setTimeout(() => {
-        localStorage.setItem('casinoUser', JSON.stringify(playerData));
+    setTimeout(async () => {
+        // Zaktualizuj Firebase (źródło prawdy)
+        await updateUserMoney(playerData.uid, finalMoney);
+        
+        // Zaktualizuj localStorage i UI
+        playerData.money = finalMoney;
+        try {
+            localStorage.setItem('casinoUser', JSON.stringify(playerData));
+        } catch (storageError) {
+            console.warn('Nie można zapisać do localStorage:', storageError);
+        }
         updateHeader(playerData.name, playerData.money);
 
         if (playerData.uid && playerData.name) {

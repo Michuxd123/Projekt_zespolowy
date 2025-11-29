@@ -2,7 +2,7 @@
 // Używamy pełnych linków URL (CDN) dla modułów Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyB8FBAEZhuySlc2-kl59x6A_AXpXBVyZGw",
@@ -23,3 +23,15 @@ export const auth = getAuth(app);
 
 // Eksportuj konkretne funkcje logowania, aby ułatwić ich użycie
 export { signInAnonymously, onAuthStateChanged, signOut };
+
+export async function updateUserMoney(uid, money) {
+    const userRef = doc(db, "users", uid);
+    await setDoc(userRef, { money: money }, { merge: true });
+}
+
+export async function getUserMoney(uid) {
+    const userRef = doc(db, "users", uid);
+    const snap = await getDoc(userRef);
+    if (snap.exists()) return snap.data().money;
+    return null;
+}

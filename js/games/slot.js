@@ -2,6 +2,7 @@
 
 import { saveScore } from '../leaderboard.js';
 import { updateHeader } from '../ui.js';
+import { getUserMoney, updateUserMoney } from '../firebaseConfig.js';
 
 // Definicja symboli (zgodnie z poprzednią sugestią, aby diament był rzadki)
 const symbols = [
@@ -27,9 +28,15 @@ const messageEl = document.getElementById('slot-result-message');
 // Nasłuchiwanie na kliknięcie przycisku "Zakręć"
 spinButton.addEventListener('click', spin);
 
-function spin() {
+async function spin() {
     // 1. Pobierz dane gracza (z localStorage)
-    let playerData = JSON.parse(localStorage.getItem('casinoUser'));
+    let playerData = null;
+    try {
+        playerData = JSON.parse(localStorage.getItem('casinoUser'));
+    } catch (storageError) {
+        console.warn('Nie można odczytać localStorage:', storageError);
+    }
+    
     const bet = parseInt(betInput.value);
 
     // 2. Sprawdź, czy gracza stać na zakład
@@ -37,13 +44,42 @@ function spin() {
         messageEl.textContent = "Musisz postawić zakład!";
         return;
     }
+    
+    if (!playerData || !playerData.uid) {
+        messageEl.textContent = "Zaloguj się najpierw!";
+        return;
+    }
+    
+    // Pobierz prawdziwe saldo z Firebase
+    const realMoney = await getUserMoney(playerData.uid);
+    if (realMoney !== null && realMoney !== undefined) {
+        playerData.money = realMoney;
+        try {
+            localStorage.setItem('casinoUser', JSON.stringify(playerData));
+        } catch (storageError) {
+            console.warn('Nie można zapisać do localStorage:', storageError);
+        }
+    }
+    
     if (playerData.money < bet) {
         messageEl.textContent = "Nie masz wystarczająco pieniędzy!";
         return;
     }
 
     // 3. Odejmij zakład i zablokuj przycisk
-    playerData.money -= bet;
+    const newMoney = playerData.money - bet;
+    
+    // Zaktualizuj Firebase (źródło prawdy)
+    await updateUserMoney(playerData.uid, newMoney);
+    
+    // Zaktualizuj localStorage
+    playerData.money = newMoney;
+    try {
+        localStorage.setItem('casinoUser', JSON.stringify(playerData));
+    } catch (storageError) {
+        console.warn('Nie można zapisać do localStorage:', storageError);
+    }
+    
     spinButton.disabled = true;
     messageEl.textContent = "Kręcę...";
 
@@ -59,7 +95,7 @@ function spin() {
     const results = [result1, result2, result3];
 
     // 6. Zatrzymaj animację po 2 sekundach i pokaż wyniki
-    setTimeout(() => {
+    setTimeout(async () => {
         stopSpinningAnimation();
         
         // Wyświetl wyniki
@@ -69,24 +105,34 @@ function spin() {
 
         // Sprawdź wygraną
         const winnings = checkWinnings(results, bet);
+        
+        let finalMoney = playerData.money;
 
         if (winnings > 0) {
             messageEl.textContent = `Wygrałeś ${winnings}!`;
-            playerData.money += winnings;
+            finalMoney += winnings;
             showWinAnimation();
-        
-            // Aktualizuj maksymalny wynik (maxScore) w Firestore
-            if (playerData.uid && playerData.name) {
-                saveScore(playerData.uid, playerData.name, playerData.money);
-            }
-        
         } else {
             messageEl.textContent = "Próbuj dalej!";
         }
 
-        // Zapisz nowy stan kasy i zaktualizuj UI
-        localStorage.setItem('casinoUser', JSON.stringify(playerData));
+        // Zaktualizuj Firebase (źródło prawdy)
+        await updateUserMoney(playerData.uid, finalMoney);
+        
+        // Zaktualizuj localStorage i UI
+        playerData.money = finalMoney;
+        try {
+            localStorage.setItem('casinoUser', JSON.stringify(playerData));
+        } catch (storageError) {
+            console.warn('Nie można zapisać do localStorage:', storageError);
+        }
         updateHeader(playerData.name, playerData.money);
+        
+        // Aktualizuj maksymalny wynik (maxScore) w Firestore
+        if (playerData.uid && playerData.name) {
+            saveScore(playerData.uid, playerData.name, playerData.money);
+        }
+        
         spinButton.disabled = false;
 
     }, 2000); // Kręcenie przez 2 sekundy

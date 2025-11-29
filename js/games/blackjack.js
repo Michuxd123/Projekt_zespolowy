@@ -1,4 +1,5 @@
 import { updateHeader } from '../ui.js';
+import { getUserMoney, updateUserMoney } from '../firebaseConfig.js';
 
 let dealerSum = 0;
 let yourSum = 0;
@@ -20,9 +21,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const hitBtn = document.getElementById("hit");
     const stayBtn = document.getElementById("stay");
 
-    if (newRoundBtn) newRoundBtn.addEventListener("click", startNewRound);
+    if (newRoundBtn) newRoundBtn.addEventListener("click", () => startNewRound());
     if (hitBtn) hitBtn.addEventListener("click", hit);
-    if (stayBtn) stayBtn.addEventListener("click", stay);
+    if (stayBtn) stayBtn.addEventListener("click", () => stay());
 
     if (hitBtn) hitBtn.disabled = true;
     if (stayBtn) stayBtn.disabled = true;
@@ -50,11 +51,11 @@ function ensureBetControls() {
         }
        
         const btn = document.getElementById("blackjack-new-round");
-        if (btn) btn.addEventListener("click", startNewRound);
+        if (btn) btn.addEventListener("click", () => startNewRound());
     }
 }
 
-function startNewRound() {
+async function startNewRound() {
     const dealerCards = document.getElementById("dealer-cards");
     const yourCards = document.getElementById("your-cards");
     const dealerSumEl = document.getElementById("dealer-sum");
@@ -78,7 +79,7 @@ function startNewRound() {
     
     buildDeck();
     shuffleDeck();
-    startGame();
+    await startGame();
 }
 
 function buildDeck() {
@@ -102,16 +103,37 @@ function shuffleDeck() {
     }
 }
 
-function getPlayerAndBet() {
-    const playerData = JSON.parse(localStorage.getItem('casinoUser') || "null");
+async function getPlayerAndBet() {
+    let playerData = null;
+    try {
+        playerData = JSON.parse(localStorage.getItem('casinoUser') || "null");
+    } catch (storageError) {
+        console.warn('Nie można odczytać localStorage:', storageError);
+    }
+    
+    if (!playerData || !playerData.uid) {
+        return { playerData: null, bet: 0 };
+    }
+    
+    // Pobierz prawdziwe saldo z Firebase
+    const realMoney = await getUserMoney(playerData.uid);
+    if (realMoney !== null && realMoney !== undefined) {
+        playerData.money = realMoney;
+        try {
+            localStorage.setItem('casinoUser', JSON.stringify(playerData));
+        } catch (storageError) {
+            console.warn('Nie można zapisać do localStorage:', storageError);
+        }
+    }
+    
     let betInput = document.getElementById("blackjack-bet");
     let bet = betInput ? parseInt(betInput.value) : NaN;
     if (isNaN(bet) || bet <= 0) bet = 10;
     return { playerData, bet };
 }
 
-function startGame() {
-    const { playerData, bet } = getPlayerAndBet();
+async function startGame() {
+    const { playerData, bet } = await getPlayerAndBet();
     const resultsEl = document.getElementById("results");
     
     if (!playerData) {
@@ -128,21 +150,35 @@ function startGame() {
     }
    
     currentBet = bet;
-    playerData.money -= currentBet;
-    localStorage.setItem('casinoUser', JSON.stringify(playerData));
+    const newMoney = playerData.money - currentBet;
+    
+    // Zaktualizuj Firebase (źródło prawdy)
+    await updateUserMoney(playerData.uid, newMoney);
+    
+    // Zaktualizuj localStorage i UI
+    playerData.money = newMoney;
+    try {
+        localStorage.setItem('casinoUser', JSON.stringify(playerData));
+    } catch (storageError) {
+        console.warn('Nie można zapisać do localStorage:', storageError);
+    }
     updateHeader(playerData.name, playerData.money);
 
     const dealerCards = document.getElementById("dealer-cards");
+    if(dealerCards) dealerCards.innerHTML = ""; // Wyczyść wszystkie karty
+    
+    // Pierwsza karta krupiera - zakryta
+    hidden = deck.pop();
+    dealerSum += getValue(hidden);
+    dealerAceCount += checkAce(hidden);
+    
     let hiddenImg = document.createElement("img");
     hiddenImg.id = "hidden";
     hiddenImg.alt = "Hidden";
     hiddenImg.src = "js/games/cards/BACK.png"; 
     if(dealerCards) dealerCards.append(hiddenImg);
 
-    hidden = deck.pop();
-    dealerSum += getValue(hidden);
-    dealerAceCount += checkAce(hidden);
-
+    // Druga karta krupiera - odkryta
     let cardImg = document.createElement("img");
     let card = deck.pop();
     cardImg.src = "js/games/cards/" + card + ".png";
@@ -153,6 +189,12 @@ function startGame() {
     document.getElementById("dealer-sum").innerText = visibleValue;
 
     const yourCards = document.getElementById("your-cards");
+    if(yourCards) yourCards.innerHTML = ""; // Upewnij się, że karty gracza są wyczyszczone
+    
+    // Resetuj sumę gracza przed rozdaniem
+    yourSum = 0;
+    yourAceCount = 0;
+    
     for (let i = 0; i < 2; i++) {
         let cardImg = document.createElement("img");
         let card = deck.pop();
@@ -162,7 +204,9 @@ function startGame() {
         if(yourCards) yourCards.append(cardImg);
     }
     
-    yourSum = reduceAce(yourSum, yourAceCount);
+    const result = reduceAce(yourSum, yourAceCount);
+    yourSum = result.sum;
+    yourAceCount = result.aceCount;
     document.getElementById("your-sum").innerText = yourSum;
     
     document.getElementById("hit").disabled = false;
@@ -184,7 +228,9 @@ function hit() {
     yourAceCount += checkAce(card);
     document.getElementById("your-cards")?.append(cardImg);
     
-    yourSum = reduceAce(yourSum, yourAceCount);
+    const result = reduceAce(yourSum, yourAceCount);
+    yourSum = result.sum;
+    yourAceCount = result.aceCount;
     document.getElementById("your-sum").innerText = yourSum;
 
     if (yourSum > 21) { 
@@ -193,27 +239,50 @@ function hit() {
     }
 }
 
-function settlePayout(result) {
-    const playerData = JSON.parse(localStorage.getItem('casinoUser') || "null");
-    if (!playerData) return;
+async function settlePayout(result) {
+    let playerData = null;
+    try {
+        playerData = JSON.parse(localStorage.getItem('casinoUser') || "null");
+    } catch (storageError) {
+        console.warn('Nie można odczytać localStorage:', storageError);
+    }
+    
+    if (!playerData || !playerData.uid) return;
+    
+    let newMoney = playerData.money;
     if (result === "win") {
-        playerData.money += currentBet * 2;
+        newMoney += currentBet * 2;
     } else if (result === "tie") {
-        playerData.money += currentBet;
-    } 
-    localStorage.setItem('casinoUser', JSON.stringify(playerData));
+        newMoney += currentBet;
+    }
+    
+    // Zaktualizuj Firebase (źródło prawdy)
+    await updateUserMoney(playerData.uid, newMoney);
+    
+    // Zaktualizuj localStorage i UI
+    playerData.money = newMoney;
+    try {
+        localStorage.setItem('casinoUser', JSON.stringify(playerData));
+    } catch (storageError) {
+        console.warn('Nie można zapisać do localStorage:', storageError);
+    }
     updateHeader(playerData.name, playerData.money);
     currentBet = 0;
 }
 
-function stay() {
+async function stay() {
     canHit = false;
     document.getElementById("hit").disabled = true;
     document.getElementById("stay").disabled = true;
     document.getElementById("blackjack-new-round").disabled = false;
 
-    dealerSum = reduceAce(dealerSum, dealerAceCount);
-    yourSum = reduceAce(yourSum, yourAceCount);
+    let dealerResult = reduceAce(dealerSum, dealerAceCount);
+    dealerSum = dealerResult.sum;
+    dealerAceCount = dealerResult.aceCount;
+    
+    let yourResult = reduceAce(yourSum, yourAceCount);
+    yourSum = yourResult.sum;
+    yourAceCount = yourResult.aceCount;
 
     const hiddenEl = document.getElementById("hidden");
     if (hiddenEl) hiddenEl.src = "js/games/cards/" + hidden + ".png";
@@ -225,7 +294,9 @@ function stay() {
         cardImg.src = "js/games/cards/" + card + ".png";
         dealerSum += getValue(card);
         dealerAceCount += checkAce(card);
-        dealerSum = reduceAce(dealerSum, dealerAceCount);
+        dealerResult = reduceAce(dealerSum, dealerAceCount);
+        dealerSum = dealerResult.sum;
+        dealerAceCount = dealerResult.aceCount;
         document.getElementById("dealer-cards")?.append(cardImg);
         document.getElementById("dealer-sum").innerText = dealerSum;
     }
@@ -258,7 +329,7 @@ function stay() {
     document.getElementById("your-sum").innerText = yourSum;
     document.getElementById("results").innerText = message;
 
-    settlePayout(outcome);
+    await settlePayout(outcome);
 }
 
 function getValue(card) {
@@ -279,9 +350,11 @@ function checkAce(card) {
 }
 
 function reduceAce(playerSum, playerAceCount) {
-    while (playerSum > 21 && playerAceCount > 0) {
-        playerSum -= 10;
-        playerAceCount -= 1;
+    let sum = playerSum;
+    let aceCount = playerAceCount;
+    while (sum > 21 && aceCount > 0) {
+        sum -= 10;
+        aceCount -= 1;
     }
-    return playerSum;
+    return { sum, aceCount };
 }
