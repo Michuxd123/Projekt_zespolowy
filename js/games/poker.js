@@ -21,6 +21,8 @@ let currentBet = 0;
 let stage = 0;
 let gameActive = false;
 
+let bankroll = 0; 
+
 const els = {
   setup: document.getElementById('setup-screen'),
   table: document.getElementById('game-table'),
@@ -34,16 +36,25 @@ const els = {
   cpuCards: document.getElementById('cpu-cards'),
   commCards: document.getElementById('community-cards'),
   btnFold: document.getElementById('btn-fold'),
-  btnCheck: document.getElementById('btn-check'), // To jest przycisk Check/Call
+  btnCheck: document.getElementById('btn-check'),
   btnRaise: document.getElementById('btn-raise'),
   inputRaise: document.getElementById('raise-amount'),
   msg: document.getElementById('message-box'),
-  nextBtn: document.getElementById('next-hand-btn')
+  nextBtn: document.getElementById('next-hand-btn'),
+  balanceDisplay: document.getElementById('current-balance-display') 
 };
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const userStr = localStorage.getItem("casinoUser");
+    if (userStr && els.balanceDisplay) {
+        const user = JSON.parse(userStr);
+        els.balanceDisplay.textContent = user.money + "$";
+    }
+});
 
 if (els.startBtn) els.startBtn.addEventListener('click', initGame);
 if (els.btnFold) els.btnFold.addEventListener('click', () => playerAction('fold'));
-// Jeden przycisk obsługuje Check i Call zależnie od sytuacji
 if (els.btnCheck) els.btnCheck.addEventListener('click', () => playerAction('check_call'));
 
 if (els.btnRaise) els.btnRaise.addEventListener('click', () => {
@@ -57,6 +68,7 @@ if (els.btnRaise) els.btnRaise.addEventListener('click', () => {
 
 if (els.nextBtn) els.nextBtn.addEventListener('click', startRound);
 
+
 function initGame() {
   const userStr = localStorage.getItem("casinoUser");
   if (!userStr) {
@@ -64,20 +76,33 @@ function initGame() {
     return;
   }
   const user = JSON.parse(userStr);
-  const myMoney = user.money;
+  const totalUserMoney = user.money; 
 
-  if (myMoney < 10) {
-    alert("Masz za mało środków (" + myMoney + "$). Minimum to 10$.");
-    return;
+
+  let buyInAmount = parseInt(els.inputStack.value);
+
+  
+  if (isNaN(buyInAmount)) {
+      alert("Wpisz poprawną liczbę!");
+      return;
+  }
+  if (buyInAmount < 50) {
+      alert("Minimalne wejście to 50$.");
+      return;
+  }
+  if (buyInAmount > totalUserMoney) {
+      alert(`Nie masz tyle pieniędzy! Masz na koncie ${totalUserMoney}$.`);
+      return;
   }
 
-  // Ustawienie początkowe pieniędzy
-  players[0].money = myMoney;
-  players[1].money = myMoney; // CPU ma tyle samo dla balansu
   
-  // Dynamiczne ustalanie stawek
-  if (myMoney >= 1000) minBet = 50;
-  else if (myMoney >= 100) minBet = 20;
+  bankroll = totalUserMoney - buyInAmount; 
+  players[0].money = buyInAmount; 
+  players[1].money = buyInAmount; 
+  
+  
+  if (buyInAmount >= 1000) minBet = 50;
+  else if (buyInAmount >= 200) minBet = 20;
   else minBet = 10;
   
   els.setup.style.display = 'none';
@@ -107,14 +132,37 @@ function dealCard() {
 function startRound() {
   dealerIndex = (dealerIndex + 1) % 2;
 
-  // Sprawdzenie bankructwa
   if (players[0].money < minBet) {
-    alert('Brak środków na grę!');
-    gameActive = false;
-    saveGameResult(); // Zapisujemy stan (nawet jak jest 0)
+    alert('Przegrałeś żetony na stole! Koniec gry.');
+    
+    
+    saveGameResult(); 
+    
+
     els.table.style.display = 'none';
     els.setup.style.display = 'block';
+   
+    const userStr = localStorage.getItem("casinoUser");
+    if (userStr && els.balanceDisplay) {
+        const user = JSON.parse(userStr);
+        els.balanceDisplay.textContent = user.money + "$";
+    }
     return;
+  }
+  
+  
+  if (players[1].money < minBet) {
+      alert("Komputer zbankrutował! Wygrałeś wszystko ze stołu.");
+      saveGameResult();
+      els.table.style.display = 'none';
+      els.setup.style.display = 'block';
+      
+      const userStr = localStorage.getItem("casinoUser");
+      if (userStr && els.balanceDisplay) {
+        const user = JSON.parse(userStr);
+        els.balanceDisplay.textContent = user.money + "$";
+      }
+      return;
   }
 
   createDeck();
@@ -131,7 +179,6 @@ function startRound() {
     p.allIn = false;
   });
 
-  // Blindy
   const sbIndex = dealerIndex;
   const bbIndex = (dealerIndex + 1) % 2;
   const sb = Math.min(players[sbIndex].money, Math.floor(minBet / 2));
@@ -144,11 +191,8 @@ function startRound() {
   els.nextBtn.style.display = 'none';
   els.msg.textContent = `Dealer: ${players[dealerIndex].id}. SB: ${sb}, BB: ${bb}`;
   
-  // Aktualizacja UI od razu po blindach
   render();
-  
-  // Rozpoczęcie licytacji
-  bettingRound(dealerIndex); // Dealer zaczyna (Small Blind) preflop w heads-up
+  bettingRound(dealerIndex);
 }
 
 function postToPot(index, amount) {
@@ -164,14 +208,12 @@ function postToPot(index, amount) {
 }
 
 function getPostflopFirst() {
-  return (dealerIndex + 1) % 2; // Po flopie pierwszy gra ten, kto nie jest dealerem (Big Blind)
+  return (dealerIndex + 1) % 2;
 }
 
 async function bettingRound(startIndex) {
-  // Szybki check na koniec gry przed startem rundy
   if (players.some(p => p.folded)) { resolveFold(); return; }
   
-  // Auto-run dla All-in
   const everyoneAllIn = players[0].allIn || players[1].allIn;
   const contribsEqual = players[0].contrib === players[1].contrib;
   if (everyoneAllIn && contribsEqual) {
@@ -181,34 +223,27 @@ async function bettingRound(startIndex) {
   }
 
   let toAct = startIndex;
-  let acted = [false, false]; // Flagi: czy gracz podjął decyzję w tej turze licytacji
+  let acted = [false, false];
 
   while (true) {
-    // 1. WARUNKI WYJŚCIA Z PĘTLI
     const isEqual = players[0].contrib === players[1].contrib;
     const bothHaveActed = acted[0] && acted[1];
     const anyAllIn = players.some(p => p.allIn);
 
-    // Jeśli stawki równe i (obaj zagrali LUB jeden jest all-in) -> koniec rundy
     if (isEqual && (bothHaveActed || anyAllIn)) {
       break;
     }
     
-    // Specjalny przypadek All-in: jeśli jeden all-in, a drugi wyrównał -> koniec
     if (players[0].allIn && players[1].contrib >= players[0].contrib) break;
     if (players[1].allIn && players[0].contrib >= players[1].contrib) break;
 
-
-    // 2. POMIJANIE GRACZY (Fold/All-in)
     if (players[toAct].folded || players[toAct].allIn) {
       acted[toAct] = true;
       toAct = 1 - toAct;
       continue;
     }
 
-    // 3. RUCH GRACZA
     if (players[toAct].id === 'Player') {
-      // Aktualizacja tekstu przycisku Check/Call
       const diff = currentBet - players[toAct].contrib;
       if (els.btnCheck) els.btnCheck.textContent = diff > 0 ? `Call (${diff})` : "Check";
 
@@ -230,14 +265,12 @@ async function bettingRound(startIndex) {
         acted[toAct] = true;
       } 
       else if (action.type === 'raise') {
-        const raiseAmt = action.amount; // To jest kwota CAŁKOWITA (np. podbijam DO 100)
+        const raiseAmt = action.amount;
         const need = raiseAmt - players[toAct].contrib;
         
-        // Obsługa braku środków na pełny raise (All-in)
         if (need >= players[toAct].money) {
            const allInAmt = players[toAct].money; 
            doCall(toAct, allInAmt);
-           // Ustawiamy currentBet na najwyższą wartość na stole
            if (players[toAct].contrib > currentBet) currentBet = players[toAct].contrib;
            players[toAct].allIn = true;
            els.msg.textContent = `All-in! (${players[toAct].contrib}$)`;
@@ -247,12 +280,10 @@ async function bettingRound(startIndex) {
            els.msg.textContent = `Podbiłeś do ${currentBet}$`;
         }
         
-        // WAŻNE: Po podbiciu (Raise), resetujemy flagi, bo drugi gracz musi odpowiedzieć!
         acted = [false, false]; 
         acted[toAct] = true; 
       }
     } 
-    // 4. RUCH KOMPUTERA
     else {
       await sleep(1000);
       cpuDecision(toAct);
@@ -262,17 +293,15 @@ async function bettingRound(startIndex) {
         return;
       }
       
-      // Jeśli komputer przebił (Raise)
       if (players[toAct].contrib > currentBet) {
         currentBet = players[toAct].contrib;
-        // Reset flag, gracz musi odpowiedzieć
         acted = [false, false];
       }
       acted[toAct] = true;
     }
 
     render();
-    toAct = 1 - toAct; // Zmiana tury
+    toAct = 1 - toAct;
   }
 
   nextStage();
@@ -283,10 +312,7 @@ function resolveFold() {
   if (winner) {
     winner.money += pot;
     els.msg.textContent = `${winner.id} wygrywa pulę (rywal spasował).`;
-    
-    // ZAPISZ WYNIK PO WYGRANEJ
     saveGameResult();
-    
     els.nextBtn.style.display = 'inline-block';
     gameActive = false;
     render();
@@ -310,7 +336,6 @@ let playerActionResolve = null;
 function waitForPlayerAction() {
   enablePlayerControls(true);
   
-  // Blokada Raise jeśli przeciwnik jest All-in
   if (players[1].allIn) {
       if(els.btnRaise) els.btnRaise.disabled = true;
       if(els.inputRaise) els.inputRaise.disabled = true;
@@ -330,15 +355,12 @@ function playerAction(type, amount = 0) {
   
   if (type === 'fold') return playerActionResolve({ type: 'fold' });
   
-  // Obsługa jednego przycisku Check/Call
   if (type === 'check_call') {
      return playerActionResolve({ type: 'call_check' });
   }
 
-  // Obsługa Raise
   if (type === 'raise') {
     const minRaise = currentBet + minBet;
-    // Pozwalamy na raise mniejszy niż min, jeśli to All-in (kwota z inputa vs money)
     if (amount < minRaise && amount < (players[0].money + players[0].contrib)) {
        els.msg.textContent = `Minimum do: ${minRaise}$`;
        return;
@@ -353,16 +375,13 @@ function cpuDecision(idx) {
   const strength = quickHandEval([...hole, ...community]);
   const need = currentBet - cpu.contrib;
 
-  // Jeśli musi dorzucić do puli (Call/All-in/Fold)
   if (need > 0) {
-    // Jeśli nie ma tyle kasy -> All-in
     if (cpu.money <= need) {
       doCall(idx, cpu.money);
       els.msg.textContent = 'Komputer idzie All-in (Call).';
       return;
     }
     
-    // Jeśli słaba karta i duży bet -> Fold (chyba że bet mały)
     if (strength < 0.25 && need > (minBet * 2)) {
       if (Math.random() < 0.8) {
         cpu.folded = true;
@@ -371,28 +390,22 @@ function cpuDecision(idx) {
       }
     }
     
-    // Jeśli silna karta -> Raise
     if (strength > 0.7 && cpu.money >= (need + minBet)) {
-        // Raise o minBet
         const raiseTarget = currentBet + minBet;
         const raiseAmt = raiseTarget - cpu.contrib;
         doCall(idx, raiseAmt);
         els.msg.textContent = 'Komputer podbija!';
     } else {
-        // Standardowy Call
         doCall(idx, need);
         els.msg.textContent = 'Komputer sprawdza.';
     }
   } 
-  // Jeśli nikt nie podbił (Check/Bet)
   else {
     if (strength > 0.6) {
-        // Bet
         doCall(idx, minBet);
         currentBet = cpu.contrib;
         els.msg.textContent = `Komputer zagrywa ${minBet}$.`;
     } else {
-        // Check
         els.msg.textContent = 'Komputer czeka.';
     }
   }
@@ -401,7 +414,7 @@ function cpuDecision(idx) {
 function quickHandEval(cards) {
   const ranks = cards.map(c => c.rank);
   const suitsCount = {};
-  ranks.forEach(r => {}); // dummy iter
+  ranks.forEach(r => {}); 
   cards.forEach(c => suitsCount[c.suit] = (suitsCount[c.suit] || 0) + 1);
   
   const counts = {};
@@ -420,15 +433,15 @@ function nextStage() {
   currentBet = 0;
   players.forEach(p => p.contrib = 0);
   
-  if (stage === 1) { // Flop
+  if (stage === 1) { 
     community.push(dealCard(), dealCard(), dealCard());
     render();
     bettingRound(getPostflopFirst());
-  } else if (stage === 2) { // Turn
+  } else if (stage === 2) { 
     community.push(dealCard());
     render();
     bettingRound(getPostflopFirst());
-  } else if (stage === 3) { // River
+  } else if (stage === 3) { 
     community.push(dealCard());
     render();
     bettingRound(getPostflopFirst());
@@ -460,7 +473,6 @@ function showdown() {
     els.msg.textContent = 'Remis — podział puli.';
   }
   
-  // ZAPISZ WYNIK PO SHOWDOWN
   saveGameResult();
 
   els.nextBtn.style.display = 'inline-block';
@@ -476,11 +488,9 @@ function compareRankArrays(a, b) {
   return 0;
 }
 
-// Uproszczona ewaluacja dla czytelności (nie zmieniana logika samej oceny)
 function evaluateHand(cards) {
   const n = cards.length;
   if (n < 5) return { category: 0, rankArr: [] }; 
-  // Brute force combinatorics (5 z 7)
   let best = { category: -1, rankArr: [] };
   
   const getCombos = (pool, k) => {
@@ -513,11 +523,8 @@ function evaluateFive(cards) {
   for(let i=0; i<4; i++) {
       if (ranks[i] - ranks[i+1] !== 1) isStraight = false;
   }
-  // Wheel A-5
   if (!isStraight && ranks[0]===14 && ranks[1]===5 && ranks[2]===4 && ranks[3]===3 && ranks[4]===2) {
       isStraight = true;
-      // move Ace to end for ranking? In this logic simple ranking is mostly fine, but let's treat top card as 5
-      // For simplified comparing, we just need to know it's a straight.
   }
 
   const counts = {};
@@ -605,17 +612,18 @@ function sleep(ms) {
   return new Promise(r => setTimeout(r, ms)); 
 }
 
-// Funkcja zapisu
+
 async function saveGameResult() {
   const userStr = localStorage.getItem("casinoUser");
   if (!userStr) return;
   const user = JSON.parse(userStr);
   
-  // Zapisujemy aktualny stan gracza
-  const moneyToSave = players[0].money;
+ 
+  const tableMoney = players[0].money;
+  const finalBalance = bankroll + tableMoney;
   
-  await updateUserMoney(user.uid, moneyToSave);
-  user.money = moneyToSave;
+  await updateUserMoney(user.uid, finalBalance);
+  user.money = finalBalance;
   localStorage.setItem("casinoUser", JSON.stringify(user));
-  UI.updateHeader(user.name, moneyToSave);
+  UI.updateHeader(user.name, finalBalance);
 }
