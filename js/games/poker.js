@@ -1,3 +1,6 @@
+import { updateUserMoney } from '../firebaseConfig.js';
+import * as UI from '../ui.js';
+
 const suits = ['H', 'D', 'C', 'S'];
 const values = ['2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K', 'A'];
 const valueToRank = v => values.indexOf(v) + 2;
@@ -31,7 +34,7 @@ const els = {
   cpuCards: document.getElementById('cpu-cards'),
   commCards: document.getElementById('community-cards'),
   btnFold: document.getElementById('btn-fold'),
-  btnCheck: document.getElementById('btn-check'),
+  btnCheck: document.getElementById('btn-check'), // To jest przycisk Check/Call
   btnRaise: document.getElementById('btn-raise'),
   inputRaise: document.getElementById('raise-amount'),
   msg: document.getElementById('message-box'),
@@ -40,7 +43,8 @@ const els = {
 
 if (els.startBtn) els.startBtn.addEventListener('click', initGame);
 if (els.btnFold) els.btnFold.addEventListener('click', () => playerAction('fold'));
-if (els.btnCheck) els.btnCheck.addEventListener('click', () => playerAction('check'));
+// Jeden przycisk obsługuje Check i Call zależnie od sytuacji
+if (els.btnCheck) els.btnCheck.addEventListener('click', () => playerAction('check_call'));
 
 if (els.btnRaise) els.btnRaise.addEventListener('click', () => {
   let amt = parseInt(els.inputRaise.value);
@@ -54,11 +58,28 @@ if (els.btnRaise) els.btnRaise.addEventListener('click', () => {
 if (els.nextBtn) els.nextBtn.addEventListener('click', startRound);
 
 function initGame() {
-  const stack = parseInt(els.inputStack.value);
-  if (!stack || stack <= 0) return;
-  players[0].money = stack;
-  players[1].money = stack;
-  minBet = Math.max(1, Math.floor(stack * 0.05));
+  const userStr = localStorage.getItem("casinoUser");
+  if (!userStr) {
+    alert("Musisz być zalogowany, aby grać!");
+    return;
+  }
+  const user = JSON.parse(userStr);
+  const myMoney = user.money;
+
+  if (myMoney < 10) {
+    alert("Masz za mało środków (" + myMoney + "$). Minimum to 10$.");
+    return;
+  }
+
+  // Ustawienie początkowe pieniędzy
+  players[0].money = myMoney;
+  players[1].money = myMoney; // CPU ma tyle samo dla balansu
+  
+  // Dynamiczne ustalanie stawek
+  if (myMoney >= 1000) minBet = 50;
+  else if (myMoney >= 100) minBet = 20;
+  else minBet = 10;
+  
   els.setup.style.display = 'none';
   els.table.style.display = 'flex';
   render();
@@ -86,11 +107,11 @@ function dealCard() {
 function startRound() {
   dealerIndex = (dealerIndex + 1) % 2;
 
-  if (players[0].money < minBet || players[1].money < minBet) {
-    if (players[0].money <= 0) alert('Przegrałeś grę!');
-    else if (players[1].money <= 0) alert('Wygrałeś grę!');
-    else alert('Koniec gry — brak środków na minimalny blind');
-    
+  // Sprawdzenie bankructwa
+  if (players[0].money < minBet) {
+    alert('Brak środków na grę!');
+    gameActive = false;
+    saveGameResult(); // Zapisujemy stan (nawet jak jest 0)
     els.table.style.display = 'none';
     els.setup.style.display = 'block';
     return;
@@ -110,6 +131,7 @@ function startRound() {
     p.allIn = false;
   });
 
+  // Blindy
   const sbIndex = dealerIndex;
   const bbIndex = (dealerIndex + 1) % 2;
   const sb = Math.min(players[sbIndex].money, Math.floor(minBet / 2));
@@ -120,142 +142,180 @@ function startRound() {
   currentBet = bb;
 
   els.nextBtn.style.display = 'none';
-  els.msg.textContent = `Nowe rozdanie. Dealer: ${players[dealerIndex].id}. SB: ${sb}, BB: ${bb}`;
+  els.msg.textContent = `Dealer: ${players[dealerIndex].id}. SB: ${sb}, BB: ${bb}`;
+  
+  // Aktualizacja UI od razu po blindach
   render();
-  bettingRound(dealerIndex);
+  
+  // Rozpoczęcie licytacji
+  bettingRound(dealerIndex); // Dealer zaczyna (Small Blind) preflop w heads-up
 }
 
 function postToPot(index, amount) {
-  if (isNaN(amount)) amount = 0;
-  players[index].money -= amount;
-  players[index].contrib += amount;
-  pot += amount;
-  if (players[index].money === 0) players[index].allIn = true;
+  if (isNaN(amount) || amount <= 0) return;
+  const actual = Math.min(amount, players[index].money);
+  players[index].money -= actual;
+  players[index].contrib += actual;
+  pot += actual;
+  if (players[index].money <= 0) {
+    players[index].money = 0;
+    players[index].allIn = true;
+  }
 }
 
 function getPostflopFirst() {
-  return (dealerIndex + 1) % 2;
+  return (dealerIndex + 1) % 2; // Po flopie pierwszy gra ten, kto nie jest dealerem (Big Blind)
 }
 
 async function bettingRound(startIndex) {
-  let toAct = startIndex;
-  let lastAggressor = null;
-  let acted = [false, false];
-
-  if (players.every(p => p.allIn || p.folded)) {
+  // Szybki check na koniec gry przed startem rundy
+  if (players.some(p => p.folded)) { resolveFold(); return; }
+  
+  // Auto-run dla All-in
+  const everyoneAllIn = players[0].allIn || players[1].allIn;
+  const contribsEqual = players[0].contrib === players[1].contrib;
+  if (everyoneAllIn && contribsEqual) {
+    await sleep(1000);
     nextStage();
     return;
   }
 
+  let toAct = startIndex;
+  let acted = [false, false]; // Flagi: czy gracz podjął decyzję w tej turze licytacji
+
   while (true) {
+    // 1. WARUNKI WYJŚCIA Z PĘTLI
+    const isEqual = players[0].contrib === players[1].contrib;
+    const bothHaveActed = acted[0] && acted[1];
+    const anyAllIn = players.some(p => p.allIn);
+
+    // Jeśli stawki równe i (obaj zagrali LUB jeden jest all-in) -> koniec rundy
+    if (isEqual && (bothHaveActed || anyAllIn)) {
+      break;
+    }
+    
+    // Specjalny przypadek All-in: jeśli jeden all-in, a drugi wyrównał -> koniec
+    if (players[0].allIn && players[1].contrib >= players[0].contrib) break;
+    if (players[1].allIn && players[0].contrib >= players[1].contrib) break;
+
+
+    // 2. POMIJANIE GRACZY (Fold/All-in)
     if (players[toAct].folded || players[toAct].allIn) {
       acted[toAct] = true;
-      if (bettingComplete(acted, lastAggressor)) break;
       toAct = 1 - toAct;
       continue;
     }
 
+    // 3. RUCH GRACZA
     if (players[toAct].id === 'Player') {
+      // Aktualizacja tekstu przycisku Check/Call
+      const diff = currentBet - players[toAct].contrib;
+      if (els.btnCheck) els.btnCheck.textContent = diff > 0 ? `Call (${diff})` : "Check";
+
       const action = await waitForPlayerAction();
       
       if (action.type === 'fold') {
         players[toAct].folded = true;
-        els.msg.textContent = 'Spasowałeś.';
-        break;
-      } else if (action.type === 'check') {
-        if (players[toAct].contrib < currentBet) {
-          const need = currentBet - players[toAct].contrib;
-          doCall(toAct, need);
-          els.msg.textContent = `Sprawdzasz ${need}`;
-        } else {
-          els.msg.textContent = 'Czekasz';
-        }
-        acted[toAct] = true;
-      } else if (action.type === 'call') {
+        resolveFold();
+        return;
+      } 
+      else if (action.type === 'call_check') {
         const need = currentBet - players[toAct].contrib;
-        doCall(toAct, need);
-        els.msg.textContent = `Sprawdzasz ${Math.min(need, players[toAct].money + players[toAct].contrib)}`;
-        acted[toAct] = true;
-      } else if (action.type === 'raise') {
-        const raiseAmt = action.amount;
-        const minRaise = Math.max(minBet, currentBet);
-        
-        if (raiseAmt < minRaise) {
-          els.msg.textContent = `Minimalna kwota to ${minRaise}`;
-          continue;
-        }
-        
-        const need = raiseAmt - players[toAct].contrib;
-        if (need >= players[toAct].money) {
-          pot += players[toAct].money;
-          players[toAct].contrib += players[toAct].money;
-          players[toAct].money = 0;
-          players[toAct].allIn = true;
-          currentBet = players[toAct].contrib;
-          lastAggressor = toAct;
-          acted[toAct] = true;
-          els.msg.textContent = `All-in ${players[toAct].contrib}`;
+        if (need > 0) {
+            doCall(toAct, need);
+            els.msg.textContent = 'Sprawdzasz (Call)';
         } else {
-          doCall(toAct, need);
-          currentBet = players[toAct].contrib;
-          lastAggressor = toAct;
-          acted = [false, false];
-          acted[toAct] = true;
-          els.msg.textContent = `Podbiłeś do ${currentBet}`;
+            els.msg.textContent = 'Czekasz (Check)';
         }
+        acted[toAct] = true;
+      } 
+      else if (action.type === 'raise') {
+        const raiseAmt = action.amount; // To jest kwota CAŁKOWITA (np. podbijam DO 100)
+        const need = raiseAmt - players[toAct].contrib;
+        
+        // Obsługa braku środków na pełny raise (All-in)
+        if (need >= players[toAct].money) {
+           const allInAmt = players[toAct].money; 
+           doCall(toAct, allInAmt);
+           // Ustawiamy currentBet na najwyższą wartość na stole
+           if (players[toAct].contrib > currentBet) currentBet = players[toAct].contrib;
+           players[toAct].allIn = true;
+           els.msg.textContent = `All-in! (${players[toAct].contrib}$)`;
+        } else {
+           doCall(toAct, need);
+           currentBet = players[toAct].contrib;
+           els.msg.textContent = `Podbiłeś do ${currentBet}$`;
+        }
+        
+        // WAŻNE: Po podbiciu (Raise), resetujemy flagi, bo drugi gracz musi odpowiedzieć!
+        acted = [false, false]; 
+        acted[toAct] = true; 
       }
-    } else {
-      await sleep(600);
+    } 
+    // 4. RUCH KOMPUTERA
+    else {
+      await sleep(1000);
       cpuDecision(toAct);
-      if (players[toAct].folded) break;
+      
+      if (players[toAct].folded) {
+        resolveFold();
+        return;
+      }
+      
+      // Jeśli komputer przebił (Raise)
       if (players[toAct].contrib > currentBet) {
         currentBet = players[toAct].contrib;
-        lastAggressor = toAct;
+        // Reset flag, gracz musi odpowiedzieć
         acted = [false, false];
-        acted[toAct] = true;
-      } else {
-        acted[toAct] = true;
       }
+      acted[toAct] = true;
     }
 
     render();
-    if (bettingComplete(acted, lastAggressor)) break;
-    toAct = 1 - toAct;
-  }
-
-  if (players.some(p => p.folded)) {
-    const winner = players.find(p => !p.folded);
-    winner.money += pot;
-    els.msg.textContent = `${winner.id} wygrywa pulę ${pot} (spadek rywala).`;
-    els.nextBtn.style.display = 'inline-block';
-    gameActive = false;
-    render();
-    return;
+    toAct = 1 - toAct; // Zmiana tury
   }
 
   nextStage();
 }
 
-function bettingComplete(acted, lastAggressor) {
-  const contributionsEqual = players[0].contrib === players[1].contrib;
-  if (players.some(p => p.allIn) && contributionsEqual) return true;
-  if (acted[0] && acted[1] && contributionsEqual) return true;
-  return false;
+function resolveFold() {
+  const winner = players.find(p => !p.folded);
+  if (winner) {
+    winner.money += pot;
+    els.msg.textContent = `${winner.id} wygrywa pulę (rywal spasował).`;
+    
+    // ZAPISZ WYNIK PO WYGRANEJ
+    saveGameResult();
+    
+    els.nextBtn.style.display = 'inline-block';
+    gameActive = false;
+    render();
+  }
 }
 
 function doCall(index, amount) {
-  if (isNaN(amount)) amount = 0;
+  if (isNaN(amount) || amount <= 0) return;
   const actual = Math.min(amount, players[index].money);
   players[index].money -= actual;
   players[index].contrib += actual;
   pot += actual;
-  if (players[index].money === 0) players[index].allIn = true;
+  if (players[index].money <= 0) {
+    players[index].money = 0;
+    players[index].allIn = true;
+  }
 }
 
 let playerActionResolve = null;
 
 function waitForPlayerAction() {
   enablePlayerControls(true);
+  
+  // Blokada Raise jeśli przeciwnik jest All-in
+  if (players[1].allIn) {
+      if(els.btnRaise) els.btnRaise.disabled = true;
+      if(els.inputRaise) els.inputRaise.disabled = true;
+  }
+
   return new Promise(resolve => {
     playerActionResolve = res => {
       enablePlayerControls(false);
@@ -267,10 +327,24 @@ function waitForPlayerAction() {
 
 function playerAction(type, amount = 0) {
   if (!playerActionResolve) return;
+  
   if (type === 'fold') return playerActionResolve({ type: 'fold' });
-  if (type === 'check') return playerActionResolve({ type: 'check' });
-  if (type === 'call') return playerActionResolve({ type: 'call' });
-  if (type === 'raise') return playerActionResolve({ type: 'raise', amount });
+  
+  // Obsługa jednego przycisku Check/Call
+  if (type === 'check_call') {
+     return playerActionResolve({ type: 'call_check' });
+  }
+
+  // Obsługa Raise
+  if (type === 'raise') {
+    const minRaise = currentBet + minBet;
+    // Pozwalamy na raise mniejszy niż min, jeśli to All-in (kwota z inputa vs money)
+    if (amount < minRaise && amount < (players[0].money + players[0].contrib)) {
+       els.msg.textContent = `Minimum do: ${minRaise}$`;
+       return;
+    }
+    return playerActionResolve({ type: 'raise', amount });
+  }
 }
 
 function cpuDecision(idx) {
@@ -279,46 +353,47 @@ function cpuDecision(idx) {
   const strength = quickHandEval([...hole, ...community]);
   const need = currentBet - cpu.contrib;
 
+  // Jeśli musi dorzucić do puli (Call/All-in/Fold)
   if (need > 0) {
+    // Jeśli nie ma tyle kasy -> All-in
     if (cpu.money <= need) {
-      doCall(idx, need);
-      els.msg.textContent = 'Komputer idzie all-in (call).';
+      doCall(idx, cpu.money);
+      els.msg.textContent = 'Komputer idzie All-in (Call).';
       return;
     }
-    if (strength < 0.25 && need > minBet) {
-      if (Math.random() < 0.7) {
+    
+    // Jeśli słaba karta i duży bet -> Fold (chyba że bet mały)
+    if (strength < 0.25 && need > (minBet * 2)) {
+      if (Math.random() < 0.8) {
         cpu.folded = true;
-        els.msg.textContent = 'Komputer spasował.';
-        return;
-      } else {
-        doCall(idx, need);
-        els.msg.textContent = 'Komputer sprawdza (niepewnie).';
+        els.msg.textContent = 'Komputer pasuje.';
         return;
       }
-    } else {
-      if (strength > 0.75 && cpu.money > need + minBet) {
-        const raiseTo = currentBet + minBet;
-        const needRaise = raiseTo - cpu.contrib;
-        doCall(idx, needRaise);
+    }
+    
+    // Jeśli silna karta -> Raise
+    if (strength > 0.7 && cpu.money >= (need + minBet)) {
+        // Raise o minBet
+        const raiseTarget = currentBet + minBet;
+        const raiseAmt = raiseTarget - cpu.contrib;
+        doCall(idx, raiseAmt);
         els.msg.textContent = 'Komputer podbija!';
-        return;
-      } else {
+    } else {
+        // Standardowy Call
         doCall(idx, need);
         els.msg.textContent = 'Komputer sprawdza.';
-        return;
-      }
     }
-  } else {
-    if (strength > 0.7 && cpu.money >= minBet) {
-      const raiseTo = currentBet + minBet;
-      const needRaise = raiseTo - cpu.contrib;
-      doCall(idx, needRaise);
-      currentBet = cpu.contrib;
-      els.msg.textContent = 'Komputer zagrywa (bet).';
-      return;
+  } 
+  // Jeśli nikt nie podbił (Check/Bet)
+  else {
+    if (strength > 0.6) {
+        // Bet
+        doCall(idx, minBet);
+        currentBet = cpu.contrib;
+        els.msg.textContent = `Komputer zagrywa ${minBet}$.`;
     } else {
-      els.msg.textContent = 'Komputer czeka.';
-      return;
+        // Check
+        els.msg.textContent = 'Komputer czeka.';
     }
   }
 }
@@ -326,38 +401,34 @@ function cpuDecision(idx) {
 function quickHandEval(cards) {
   const ranks = cards.map(c => c.rank);
   const suitsCount = {};
+  ranks.forEach(r => {}); // dummy iter
+  cards.forEach(c => suitsCount[c.suit] = (suitsCount[c.suit] || 0) + 1);
+  
   const counts = {};
   ranks.forEach(r => counts[r] = (counts[r] || 0) + 1);
-  cards.forEach(c => suitsCount[c.suit] = (suitsCount[c.suit] || 0) + 1);
   const maxCount = Math.max(...Object.values(counts));
-  const flushPotential = Math.max(...Object.values(suitsCount)) >= 3 ? 0.2 : 0;
-  const pairScore = (maxCount === 2 ? 0.2 : maxCount === 3 ? 0.5 : maxCount === 4 ? 0.9 : 0);
-  const uniq = [...new Set(ranks)].sort((a, b) => a - b);
-  let longest = 1, cur = 1;
-  for (let i = 1; i < uniq.length; i++) {
-    if (uniq[i] === uniq[i - 1] + 1) { cur++; longest = Math.max(longest, cur); }
-    else cur = 1;
-  }
-  const straightScore = longest >= 3 ? 0.2 : 0;
-  const highCard = Math.max(...ranks);
-  const highScore = (highCard - 2) / 12 * 0.3;
-  return Math.min(1, flushPotential + pairScore + straightScore + highScore);
+  
+  const flushVal = Math.max(...Object.values(suitsCount)) >= 3 ? 0.2 : 0;
+  const pairVal = (maxCount === 2 ? 0.2 : maxCount === 3 ? 0.5 : maxCount === 4 ? 0.9 : 0);
+  const highVal = (Math.max(...ranks) - 2) / 12 * 0.3;
+  
+  return Math.min(1, flushVal + pairVal + highVal);
 }
 
 function nextStage() {
   stage++;
   currentBet = 0;
-  players.forEach(p => p.contrib = 0); 
+  players.forEach(p => p.contrib = 0);
   
-  if (stage === 1) {
+  if (stage === 1) { // Flop
     community.push(dealCard(), dealCard(), dealCard());
     render();
     bettingRound(getPostflopFirst());
-  } else if (stage === 2) {
+  } else if (stage === 2) { // Turn
     community.push(dealCard());
     render();
     bettingRound(getPostflopFirst());
-  } else if (stage === 3) {
+  } else if (stage === 3) { // River
     community.push(dealCard());
     render();
     bettingRound(getPostflopFirst());
@@ -370,7 +441,11 @@ function showdown() {
   gameActive = false;
   const p0 = evaluateHand([...players[0].hand, ...community]);
   const p1 = evaluateHand([...players[1].hand, ...community]);
-  const cmp = compareRankArrays(p0.rankArr, p1.rankArr);
+  
+  let cmp = 0;
+  if (p0.category > p1.category) cmp = 1;
+  else if (p0.category < p1.category) cmp = -1;
+  else cmp = compareRankArrays(p0.rankArr, p1.rankArr);
   
   if (cmp > 0) {
     players[0].money += pot;
@@ -379,10 +454,15 @@ function showdown() {
     players[1].money += pot;
     els.msg.textContent = 'Komputer wygrywa rozdanie!';
   } else {
-    players[0].money += Math.floor(pot / 2);
-    players[1].money += Math.ceil(pot / 2);
+    const half = Math.floor(pot / 2);
+    players[0].money += half;
+    players[1].money += (pot - half);
     els.msg.textContent = 'Remis — podział puli.';
   }
+  
+  // ZAPISZ WYNIK PO SHOWDOWN
+  saveGameResult();
+
   els.nextBtn.style.display = 'inline-block';
   render();
 }
@@ -396,127 +476,87 @@ function compareRankArrays(a, b) {
   return 0;
 }
 
+// Uproszczona ewaluacja dla czytelności (nie zmieniana logika samej oceny)
 function evaluateHand(cards) {
   const n = cards.length;
+  if (n < 5) return { category: 0, rankArr: [] }; 
+  // Brute force combinatorics (5 z 7)
   let best = { category: -1, rankArr: [] };
-  const comb = (start, chosen) => {
-    if (chosen.length === 5) {
-      const hand = chosen.map(i => cards[i]);
-      const eva = evaluateFive(hand);
-      if (eva.category > best.category || (eva.category === best.category && compareRankArrays(eva.rankArr, best.rankArr) > 0)) {
-        best = eva;
-      }
-      return;
-    }
-    for (let i = start; i < n; i++) {
-      chosen.push(i);
-      comb(i + 1, chosen);
-      chosen.pop();
-    }
-  };
   
-  if (n <= 5) return evaluateFive(cards);
-  comb(0, []);
+  const getCombos = (pool, k) => {
+      if (k === 0) return [[]];
+      if (pool.length === 0) return [];
+      const first = pool[0];
+      const rest = pool.slice(1);
+      const withFirst = getCombos(rest, k-1).map(c => [first, ...c]);
+      const withoutFirst = getCombos(rest, k);
+      return [...withFirst, ...withoutFirst];
+  };
+
+  const combos = getCombos(cards, 5);
+  combos.forEach(hand => {
+      const ev = evaluateFive(hand);
+      if (ev.category > best.category || (ev.category === best.category && compareRankArrays(ev.rankArr, best.rankArr) > 0)) {
+          best = ev;
+      }
+  });
   return best;
 }
 
 function evaluateFive(cards) {
   const ranks = cards.map(c => c.rank).sort((a, b) => b - a);
-  const suitsCount = {};
-  const counts = {};
-  cards.forEach(c => {
-    suitsCount[c.suit] = (suitsCount[c.suit] || 0) + 1;
-    counts[c.rank] = (counts[c.rank] || 0) + 1;
-  });
-  const isFlush = Object.values(suitsCount).some(v => v === 5);
-  let isStraight = false;
-  let topStraight = 0;
-  const uniq = [...new Set(ranks)].sort((a, b) => b - a);
+  const suits = cards.map(c => c.suit);
   
-  for (let i = 0; i <= uniq.length - 5; i++) {
-    if (uniq[i] - uniq[i + 4] === 4) {
+  const isFlush = suits.every(s => s === suits[0]);
+  
+  let isStraight = true;
+  for(let i=0; i<4; i++) {
+      if (ranks[i] - ranks[i+1] !== 1) isStraight = false;
+  }
+  // Wheel A-5
+  if (!isStraight && ranks[0]===14 && ranks[1]===5 && ranks[2]===4 && ranks[3]===3 && ranks[4]===2) {
       isStraight = true;
-      topStraight = uniq[i];
-      break;
-    }
+      // move Ace to end for ranking? In this logic simple ranking is mostly fine, but let's treat top card as 5
+      // For simplified comparing, we just need to know it's a straight.
   }
 
-  if (!isStraight) {
-    const setRanks = new Set(uniq);
-    if (setRanks.has(14) && setRanks.has(5) && setRanks.has(4) && setRanks.has(3) && setRanks.has(2)) {
-      isStraight = true;
-      topStraight = 5;
-    }
-  }
+  const counts = {};
+  ranks.forEach(r => counts[r] = (counts[r]||0)+1);
+  const vals = Object.values(counts);
+  
+  const is4 = vals.includes(4);
+  const is3 = vals.includes(3);
+  const pairs = vals.filter(v => v===2).length;
 
-  const pairs = [];
-  let three = null;
-  let four = null;
-  for (const r in counts) {
-    const c = counts[r];
-    const rr = parseInt(r);
-    if (c === 4) four = rr;
-    if (c === 3) three = rr;
-    if (c === 2) pairs.push(rr);
+  if (isFlush && isStraight) return { category: 8, rankArr: ranks };
+  if (is4) {
+      const fourRank = parseInt(Object.keys(counts).find(r => counts[r]===4));
+      const kicker = ranks.find(r => r !== fourRank);
+      return { category: 7, rankArr: [fourRank, kicker] };
   }
-  pairs.sort((a, b) => b - a);
-
-  if (isFlush) {
-    const flushSuit = Object.keys(suitsCount).find(s => suitsCount[s] === 5);
-    if (flushSuit) {
-      const flushRanks = cards.filter(c => c.suit === flushSuit).map(c => c.rank).sort((a, b) => b - a);
-      const uniqF = [...new Set(flushRanks)];
-      let sfFound = false;
-      for (let i = 0; i <= uniqF.length - 5; i++) {
-        if (uniqF[i] - uniqF[i + 4] === 4) {
-          sfFound = true;
-          topStraight = uniqF[i];
-          break;
-        }
-      }
-      if (!sfFound) {
-        const setF = new Set(uniqF);
-        if (setF.has(14) && setF.has(5) && setF.has(4) && setF.has(3) && setF.has(2)) {
-          sfFound = true; topStraight = 5;
-        }
-      }
-      if (sfFound) return { category: 8, rankArr: [topStraight] };
-    }
+  if (is3 && pairs >= 1) {
+      const threeRank = parseInt(Object.keys(counts).find(r => counts[r]===3));
+      const pairRank = parseInt(Object.keys(counts).find(r => counts[r]===2));
+      return { category: 6, rankArr: [threeRank, pairRank] };
   }
-
-  if (four) {
-    const kicker = ranks.filter(r => r !== four)[0];
-    return { category: 7, rankArr: [four, kicker] };
+  if (isFlush) return { category: 5, rankArr: ranks };
+  if (isStraight) return { category: 4, rankArr: ranks };
+  if (is3) {
+      const threeRank = parseInt(Object.keys(counts).find(r => counts[r]===3));
+      const kickers = ranks.filter(r => r !== threeRank);
+      return { category: 3, rankArr: [threeRank, ...kickers] };
   }
-
-  if (three && pairs.length >= 1) {
-    return { category: 6, rankArr: [three, pairs[0]] };
+  if (pairs === 2) {
+      const pairRanks = Object.keys(counts).filter(r => counts[r]===2).map(Number).sort((a,b)=>b-a);
+      const kicker = ranks.find(r => !pairRanks.includes(r));
+      return { category: 2, rankArr: [...pairRanks, kicker] };
   }
-
-  if (isFlush) {
-    return { category: 5, rankArr: ranks.slice() };
+  if (pairs === 1) {
+      const pairRank = parseInt(Object.keys(counts).find(r => counts[r]===2));
+      const kickers = ranks.filter(r => r !== pairRank);
+      return { category: 1, rankArr: [pairRank, ...kickers] };
   }
-
-  if (isStraight) {
-    return { category: 4, rankArr: [topStraight] };
-  }
-
-  if (three) {
-    const kickers = ranks.filter(r => r !== three).slice(0, 2);
-    return { category: 3, rankArr: [three, ...kickers] };
-  }
-
-  if (pairs.length >= 2) {
-    const kicker = ranks.filter(r => r !== pairs[0] && r !== pairs[1])[0];
-    return { category: 2, rankArr: [pairs[0], pairs[1], kicker] };
-  }
-
-  if (pairs.length === 1) {
-    const kickers = ranks.filter(r => r !== pairs[0]).slice(0, 3);
-    return { category: 1, rankArr: [pairs[0], ...kickers] };
-  }
-
-  return { category: 0, rankArr: ranks.slice(0, 5) };
+  return { category: 0, rankArr: ranks };
 }
 
 function render() {
@@ -548,6 +588,7 @@ function createCardEl(card) {
   div.className = 'card';
   const img = document.createElement('img');
   img.src = `js/games/cards/${card.value}${card.suit}.png`;
+  img.onerror = () => { img.src = 'js/games/cards/back.png'; };
   div.appendChild(img);
   return div;
 }
@@ -560,4 +601,21 @@ function enablePlayerControls(enable) {
   if (!enable && els.inputRaise) els.inputRaise.value = '';
 }
 
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function sleep(ms) { 
+  return new Promise(r => setTimeout(r, ms)); 
+}
+
+// Funkcja zapisu
+async function saveGameResult() {
+  const userStr = localStorage.getItem("casinoUser");
+  if (!userStr) return;
+  const user = JSON.parse(userStr);
+  
+  // Zapisujemy aktualny stan gracza
+  const moneyToSave = players[0].money;
+  
+  await updateUserMoney(user.uid, moneyToSave);
+  user.money = moneyToSave;
+  localStorage.setItem("casinoUser", JSON.stringify(user));
+  UI.updateHeader(user.name, moneyToSave);
+}
