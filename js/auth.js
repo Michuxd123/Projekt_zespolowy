@@ -1,5 +1,4 @@
-// Plik: js/auth.js
-// Minimalny, stabilny login oparty o moduły UI + Firebase
+
 
 import { auth, signInAnonymously, onAuthStateChanged, signOut } from './firebaseConfig.js';
 import * as UI from './ui.js';
@@ -68,4 +67,26 @@ document.addEventListener('DOMContentLoaded', () => {
             UI.showView('login-view');
         }
     });
+
+    const resetBtn = document.getElementById('reset-money-button');
+
+if (resetBtn) {
+    resetBtn.addEventListener('click', async () => {
+        let stored = JSON.parse(localStorage.getItem('casinoUser'));
+        if (!stored) return;
+
+        stored.money = 1000;
+        localStorage.setItem('casinoUser', JSON.stringify(stored));
+
+        UI.updateHeader(stored.name, stored.money);
+
+        
+        await saveScore(stored.uid, stored.name, stored.money);
+
+        alert("Konto zostało zresetowane do 1000.");
+
+ 
+        resetBtn.classList.add('hidden');
+    });
+}
 });
