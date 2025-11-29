@@ -1,0 +1,114 @@
+body {
+    background-color: #ffffff;
+    color: white;
+    font-family: sans-serif;
+}
+
+.poker-container {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 20px;
+}
+
+#game-table {
+    background-color: #27ae60;
+    border-radius: 50px;
+    padding: 40px;
+    border: 10px solid #1e824c;
+    position: relative;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.cards-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    height: 100px;
+    margin: 10px 0;
+}
+
+.card {
+    width: 70px;
+    height: 100px;
+    background-color: white;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: black;
+    font-weight: bold;
+    font-size: 20px;
+    border: 1px solid #ccc;
+}
+
+.card img {
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
+}
+
+.card.back {
+    background-color: #c0392b;
+    background-image: repeating-linear-gradient(45deg, #c0392b 0, #c0392b 10px, #e74c3c 10px, #e74c3c 20px);
+}
+
+.controls {
+    background: rgba(0,0,0,0.5);
+    padding: 10px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #f1c40f;
+    border: none;
+    border-radius: 5px;
+    margin: 0 5px;
+}
+
+button:hover {
+    background-color: #f39c12;
+}
+
+input {
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+}
+
+.info-panel {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    padding: 5px 15px;
+    border-radius: 20px;
+}
+
+#message-box {
+    margin-top: 10px;
+    font-weight: bold;
+    font-size: 1.2em;
+    min-height: 1.5em;
+    color: #f1c40f;
+}
+
+.winner {
+    border: 3px solid gold;
+    box-shadow: 0 0 15px gold;
+}
+
+#setup-screen {
+    background-color: rgb(255, 255, 255);
+    padding: 20px;
+    border-radius: 10px;
+    color: black;
+}
