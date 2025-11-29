@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/blackjack.css">
     <link rel="stylesheet" href="css/roulette.css">
+    <link rel="stylesheet" href="css/poker.css">
     <script type="importmap">
     {
       "imports": {
@@ -48,8 +49,7 @@
             <button class="game-button" data-view="slot-game">Automaty</button>
             <button class="game-button" data-view="blackjack-game">Blackjack</button>
             <button class="game-button" data-view="roulette-game">Ruletka</button>
-            <!-- NOWY PRZYCISK DO POKERA PONIŻEJ -->
-            <button class="game-button" onclick="window.location.href='poker.html'">Poker Texas Hold'em</button>
+            <button class="game-button" data-view="poker-game">Poker Texas Hold'em</button>
         </section>
         
         <section id="roulette-game-view" class="view hidden">
@@ -136,7 +136,49 @@
             <p id="results"></p>
             
         </section>
-        
+
+        <section id="poker-game-view" class="view hidden">
+            <div class="poker-container">
+                <div id="setup-screen">
+                    <h1>Texas Hold'em</h1>
+                    <input type="number" id="initial-stack" placeholder="Kwota wejścia (np. 1000)" value="1000">
+                    <button id="start-game-btn">Rozpocznij Grę</button>
+                </div>
+
+                <div id="game-table" style="display: none;">
+                    <div class="info-panel">
+                        <div>Pula: <span id="pot">0</span>$</div>
+                        <div>Stawka min: <span id="min-bet">0</span>$</div>
+                    </div>
+
+                    <div class="opponent-area">
+                        <div class="player-info">Komputer: <span id="cpu-money">0</span>$</div>
+                        <div class="cards-container" id="cpu-cards"></div>
+                        <div id="cpu-status"></div>
+                    </div>
+
+                    <div class="community-area">
+                        <div class="cards-container" id="community-cards"></div>
+                    </div>
+
+                    <div class="player-area">
+                        <div id="player-status"></div>
+                        <div class="cards-container" id="player-cards"></div>
+                        <div class="player-info">Ty: <span id="player-money">0</span>$</div>
+                    </div>
+
+                    <div class="controls">
+                        <button id="btn-fold">Fold</button>
+                        <button id="btn-check">Check/Call</button>
+                        <button id="btn-raise">Raise</button>
+                        <input type="number" id="raise-amount" placeholder="Kwota">
+                    </div>
+                    
+                    <div id="message-box"></div>
+                    <button id="next-hand-btn" style="display: none;">Następne rozdanie</button>
+                </div>
+            </div>
+        </section>
         
     </main> 
     
@@ -147,6 +189,7 @@
     <script type="module" src="js/games/slot.js?v=0.2.2"></script>
     <script type="module" src="js/games/blackjack.js?v=0.4.6"></script>
     <script type="module" src="js/games/roulette.js?v=0.0.1"></script>
+    <script type="module" src="js/games/poker.js"></script>
     
 </body>
 </html>
