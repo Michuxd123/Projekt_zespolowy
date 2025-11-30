@@ -201,17 +201,146 @@
             <li><strong>Showdown:</strong> Porównanie kart i wyłonienie zwycięzcy.</li>
         </ol>
         <h3>Układy kart:</h3>
-        <ul class="hand-rankings">
-            <li>Poker Królewski</li>
-            <li>Poker</li>
-            <li>Kareta</li>
-            <li>Full</li>
-            <li>Kolor</li>
-            <li>Strit</li>
-            <li>Trójka</li>
-            <li>Dwie Pary</li>
-            <li>Para</li>
-            <li>Wysoka Karta</li>
+      <ul class="hand-rankings">
+            <li class="hand-item">
+                <div class="hand-info">
+                    <strong>1. Poker Królewski (Royal Flush)</strong>
+                    <span>A, K, Q, J, 10 w jednym kolorze.</span>
+                </div>
+                <div class="hand-visual">
+                    <span class="mini-card red">A♥</span>
+                    <span class="mini-card red">K♥</span>
+                    <span class="mini-card red">Q♥</span>
+                    <span class="mini-card red">J♥</span>
+                    <span class="mini-card red">10♥</span>
+                </div>
+            </li>
+
+            <li class="hand-item">
+                <div class="hand-info">
+                    <strong>2. Poker (Straight Flush)</strong>
+                    <span>Strit w kolorze (5 kart po kolei).</span>
+                </div>
+                <div class="hand-visual">
+                    <span class="mini-card black">9♠</span>
+                    <span class="mini-card black">8♠</span>
+                    <span class="mini-card black">7♠</span>
+                    <span class="mini-card black">6♠</span>
+                    <span class="mini-card black">5♠</span>
+                </div>
+            </li>
+
+            <li class="hand-item">
+                <div class="hand-info">
+                    <strong>3. Kareta (Four of a Kind)</strong>
+                    <span>Cztery karty tej samej wartości.</span>
+                </div>
+                <div class="hand-visual">
+                    <span class="mini-card red">A♦</span>
+                    <span class="mini-card black">A♠</span>
+                    <span class="mini-card red">A♥</span>
+                    <span class="mini-card black">A♣</span>
+                    <span class="mini-card black">5♣</span>
+                </div>
+            </li>
+
+            <li class="hand-item">
+                <div class="hand-info">
+                    <strong>4. Full (Full House)</strong>
+                    <span>Trójka i para.</span>
+                </div>
+                <div class="hand-visual">
+                    <span class="mini-card red">K♦</span>
+                    <span class="mini-card black">K♠</span>
+                    <span class="mini-card red">K♥</span>
+                    <span class="mini-card black">9♣</span>
+                    <span class="mini-card red">9♦</span>
+                </div>
+            </li>
+
+            <li class="hand-item">
+                <div class="hand-info">
+                    <strong>5. Kolor (Flush)</strong>
+                    <span>5 kart tego samego koloru (nie po kolei).</span>
+                </div>
+                <div class="hand-visual">
+                    <span class="mini-card red">J♦</span>
+                    <span class="mini-card red">9♦</span>
+                    <span class="mini-card red">6♦</span>
+                    <span class="mini-card red">4♦</span>
+                    <span class="mini-card red">2♦</span>
+                </div>
+            </li>
+
+            <li class="hand-item">
+                <div class="hand-info">
+                    <strong>6. Strit (Straight)</strong>
+                    <span>5 kart po kolei (różne kolory).</span>
+                </div>
+                <div class="hand-visual">
+                    <span class="mini-card black">7♠</span>
+                    <span class="mini-card red">6♥</span>
+                    <span class="mini-card black">5♣</span>
+                    <span class="mini-card red">4♦</span>
+                    <span class="mini-card red">3♥</span>
+                </div>
+            </li>
+
+            <li class="hand-item">
+                <div class="hand-info">
+                    <strong>7. Trójka (Three of a Kind)</strong>
+                    <span>Trzy karty tej samej wartości.</span>
+                </div>
+                <div class="hand-visual">
+                    <span class="mini-card red">Q♥</span>
+                    <span class="mini-card black">Q♠</span>
+                    <span class="mini-card red">Q♦</span>
+                    <span class="mini-card black">7♣</span>
+                    <span class="mini-card red">2♥</span>
+                </div>
+            </li>
+
+            <li class="hand-item">
+                <div class="hand-info">
+                    <strong>8. Dwie Pary (Two Pair)</strong>
+                    <span>Dwa różne zestawy par.</span>
+                </div>
+                <div class="hand-visual">
+                    <span class="mini-card black">J♠</span>
+                    <span class="mini-card red">J♥</span>
+                    <span class="mini-card black">8♣</span>
+                    <span class="mini-card red">8♦</span>
+                    <span class="mini-card black">A♠</span>
+                </div>
+            </li>
+
+            <li class="hand-item">
+                <div class="hand-info">
+                    <strong>9. Para (One Pair)</strong>
+                    <span>Dwie karty tej samej wartości.</span>
+                </div>
+                <div class="hand-visual">
+                    <span class="mini-card red">10♥</span>
+                    <span class="mini-card black">10♣</span>
+                    <span class="mini-card black">K♠</span>
+                    <span class="mini-card red">4♦</span>
+                    <span class="mini-card black">3♣</span>
+                </div>
+            </li>
+
+            <li class="hand-item">
+                <div class="hand-info">
+                    <strong>10. Wysoka Karta (High Card)</strong>
+                    <span>Brak układu, decyduje najwyższa karta.</span>
+                </div>
+                <div class="hand-visual">
+                    <span class="mini-card black">A♠</span>
+                    <span class="mini-card red">J♦</span>
+                    <span class="mini-card black">8♣</span>
+                    <span class="mini-card red">5♥</span>
+                    <span class="mini-card black">2♠</span>
+                </div>
+            </li>
         </ul>
         <button id="close-rules-btn" class="close-rules">Zamknij</button>
     </div>

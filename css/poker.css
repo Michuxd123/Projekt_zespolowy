@@ -308,3 +308,60 @@ body.rules-open #info-btn {
     opacity: 0;
     pointer-events: none;
 }
+
+
+.hand-rankings {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.hand-item {
+    margin-bottom: 25px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 15px;
+}
+
+.hand-info {
+    margin-bottom: 8px;
+    display: flex;
+    flex-direction: column;
+}
+
+.hand-info strong {
+    color: #ffd700;
+    font-size: 1.1em;
+    margin-bottom: 2px;
+}
+
+.hand-info span {
+    font-size: 0.9em;
+    color: #bbb;
+}
+
+.hand-visual {
+    display: flex;
+    gap: 5px;
+}
+
+.mini-card {
+    background-color: white;
+    border-radius: 3px;
+    width: 35px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    font-size: 16px;
+    border: 1px solid #999;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+}
+
+.mini-card.red {
+    color: #d00;
+}
+
+.mini-card.black {
+    color: #000;
+}
