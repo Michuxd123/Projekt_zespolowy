@@ -178,10 +178,46 @@
                     
                     <div id="message-box"></div>
                     <button id="next-hand-btn" style="display: none;">Następne rozdanie</button>
+                    
+                    <button id="info-btn" class="info-toggle">
+                        <span>i</span>
+                    </button>
                 </div>
             </div>
         </section>
+
+<div id="rules-sidebar" class="rules-panel">
+    <div class="rules-content">
+        <h2>Zasady Gry - Texas Hold'em</h2>
+        <p>Celem gry jest skompletowanie najlepszego układu 5 kart używając 2 kart własnych i 5 kart wspólnych.</p>
         
+        <h3>Przebieg rozgrywki:</h3>
+        <ol>
+            <li><strong>Pre-Flop:</strong> Gracze otrzymują po 2 karty. Licytacja.</li>
+            <li><strong>Flop:</strong> Na stół trafiają 3 karty wspólne. Licytacja.</li>
+            <li><strong>Turn:</strong> Dochodzi 4. karta wspólna. Licytacja.</li>
+            <li><strong>River:</strong> Dochodzi 5. (ostatnia) karta. Ostatnia licytacja.</li>
+            <li><strong>Showdown:</strong> Porównanie kart i wyłonienie zwycięzcy.</li>
+        </ol>
+
+        <h3>Układy kart (od najmocniejszego):</h3>
+        <ul class="hand-rankings">
+            <li><strong>Poker Królewski (Royal Flush):</strong> A, K, Q, J, 10 w tym samym kolorze.</li>
+            <li><strong>Poker (Straight Flush):</strong> Strit w kolorze (np. 5, 6, 7, 8, 9 pik).</li>
+            <li><strong>Kareta (Four of a Kind):</strong> 4 karty tej samej wartości.</li>
+            <li><strong>Full (Full House):</strong> Trójka i para.</li>
+            <li><strong>Kolor (Flush):</strong> 5 kart tego samego koloru (nie po kolei).</li>
+            <li><strong>Strit (Straight):</strong> 5 kart po kolei (różne kolory).</li>
+            <li><strong>Trójka (Three of a Kind):</strong> 3 karty tej samej wartości.</li>
+            <li><strong>Dwie Pary (Two Pair):</strong> Dwa zestawy par.</li>
+            <li><strong>Para (One Pair):</strong> Dwie karty tej samej wartości.</li>
+            <li><strong>Wysoka Karta (High Card):</strong> Gdy nikt nie ma nic, decyduje najwyższa karta.</li>
+        </ul>
+        
+        <button id="close-rules-btn" class="close-rules">Zamknij</button>
+    </div>
+</div>
+
     </main> 
     
     <script type="module" src="js/ui.js?v=3"></script>
@@ -189,9 +225,9 @@
     <script type="module" src="js/leaderboard.js?v=3"></script>
     <script type="module" src="js/auth.js?v=3"></script>
     <script type="module" src="js/games/slot.js?v=0.2.2"></script>
-    <script type="module" src="js/games/blackjack.js?v=0.4.6"></script>
-    <script type="module" src="js/games/roulette.js?v=0.0.1"></script>
-    <script type="module" src="js/games/poker.js"></script>
+    <script type="module" src="js/games/blackjack.js?v=1.0"></script>
+    <script type="module" src="js/games/roulette.js?v=0.1"></script>
+    <script type="module" src="js/games/poker.js?=v1.0"></script>
     
 </body>
 </html>

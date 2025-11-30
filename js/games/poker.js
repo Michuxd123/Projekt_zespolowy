@@ -41,7 +41,10 @@ const els = {
   inputRaise: document.getElementById('raise-amount'),
   msg: document.getElementById('message-box'),
   nextBtn: document.getElementById('next-hand-btn'),
-  balanceDisplay: document.getElementById('current-balance-display') 
+  balanceDisplay: document.getElementById('current-balance-display'), // <--- TUTAJ BRAKOWAŁO PRZECINKA
+
+  infoBtn: document.getElementById('info-btn'),
+  closeRulesBtn: document.getElementById('close-rules-btn')
 };
 
 
@@ -56,6 +59,18 @@ document.addEventListener('DOMContentLoaded', () => {
 if (els.startBtn) els.startBtn.addEventListener('click', initGame);
 if (els.btnFold) els.btnFold.addEventListener('click', () => playerAction('fold'));
 if (els.btnCheck) els.btnCheck.addEventListener('click', () => playerAction('check_call'));
+
+if (els.infoBtn) {
+    els.infoBtn.addEventListener('click', toggleRules);
+}
+
+if (els.closeRulesBtn) {
+    els.closeRulesBtn.addEventListener('click', toggleRules);
+}
+
+function toggleRules() {
+    document.body.classList.toggle('rules-open');
+}
 
 if (els.btnRaise) els.btnRaise.addEventListener('click', () => {
   let amt = parseInt(els.inputRaise.value);
@@ -107,6 +122,7 @@ function initGame() {
   
   els.setup.style.display = 'none';
   els.table.style.display = 'flex';
+  
   render();
   startRound();
 }
@@ -132,13 +148,12 @@ function dealCard() {
 function startRound() {
   dealerIndex = (dealerIndex + 1) % 2;
 
+  // --- WARUNEK PRZEGRANEJ GRACZA ---
   if (players[0].money < minBet) {
     alert('Przegrałeś żetony na stole! Koniec gry.');
     
-    
     saveGameResult(); 
     
-
     els.table.style.display = 'none';
     els.setup.style.display = 'block';
    
@@ -147,10 +162,13 @@ function startRound() {
         const user = JSON.parse(userStr);
         els.balanceDisplay.textContent = user.money + "$";
     }
+
+    document.body.classList.remove('rules-open');
+
     return;
   }
   
-  
+  // --- WARUNEK PRZEGRANEJ KOMPUTERA ---
   if (players[1].money < minBet) {
       alert("Komputer zbankrutował! Wygrałeś wszystko ze stołu.");
       saveGameResult();
@@ -162,6 +180,9 @@ function startRound() {
         const user = JSON.parse(userStr);
         els.balanceDisplay.textContent = user.money + "$";
       }
+
+      document.body.classList.remove('rules-open');
+
       return;
   }
 
@@ -414,7 +435,7 @@ function cpuDecision(idx) {
 function quickHandEval(cards) {
   const ranks = cards.map(c => c.rank);
   const suitsCount = {};
-  ranks.forEach(r => {}); 
+  // ranks.forEach(r => {}); // Usunięta pusta pętla
   cards.forEach(c => suitsCount[c.suit] = (suitsCount[c.suit] || 0) + 1);
   
   const counts = {};
