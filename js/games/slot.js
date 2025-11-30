@@ -1,164 +1,275 @@
 // Plik: js/games/slot.js
+// 3x3 Slot Machine - Simple direct approach
 
 import { saveScore } from '../leaderboard.js';
 import { updateHeader } from '../ui.js';
 
-// Definicja symboli (zgodnie z poprzednią sugestią, aby diament był rzadki)
-const symbols = [
-    '🍒','🍒','🍒','🍒','🍒', // 5x
-    '🍋','🍋', '🍋', '🍋',   // 4x
-    '🔔','🔔', '🔔',         // 3x
-    '🍉','🍉',             // 2x
-    '7️⃣',                  // 1x
-    '💎'                   // 1x
-];
+// Symbol definitions
+const SYMBOLS = ['🍒', '🍒', '🍒', '🍒', '🍒', '🍋', '🍋', '🍋', '🍋', '🔔', '🔔', '🔔', '🍉', '🍉', '7️⃣', '💎'];
 
-// Stary obiekt 'payouts' nie jest już potrzebny, 
-// nowa logika wygranych jest poniżej w 'checkWinnings'
+// Payout multipliers for 3-of-a-kind
+const PAYOUTS = {
+    '🍒': 2, '🍋': 3, '🔔': 5, '🍉': 8, '7️⃣': 10, '💎': 15
+};
 
-// Referencje do elementów HTML
-const reel1 = document.getElementById('reel1');
-const reel2 = document.getElementById('reel2');
-const reel3 = document.getElementById('reel3');
-const spinButton = document.getElementById('spin-button');
-const betInput = document.getElementById('bet-amount');
-const messageEl = document.getElementById('slot-result-message');
+// Winning lines: [0,1,2], [3,4,5], [6,7,8], [0,4,8], [2,4,6]
+const WINNING_LINES = [[0,1,2], [3,4,5], [6,7,8], [0,4,8], [2,4,6]];
 
-// Nasłuchiwanie na kliknięcie przycisku "Zakręć"
-spinButton.addEventListener('click', spin);
+let gridCells = [];
+let currentSymbols = [];
+let isSpinning = false;
+let animationInterval = null;
 
-function spin() {
-    // 1. Pobierz dane gracza (z localStorage)
-    let playerData = JSON.parse(localStorage.getItem('casinoUser'));
-    const bet = parseInt(betInput.value);
-
-    // 2. Sprawdź, czy gracza stać na zakład
-    if (bet <= 0) {
-        messageEl.textContent = "Musisz postawić zakład!";
-        return;
+// Create the 3x3 grid
+function createGrid() {
+    const container = document.getElementById('slot-grid-3x3');
+    if (!container) {
+        console.error('slot-grid-3x3 container not found!');
+        return false;
     }
-    if (playerData.money < bet) {
-        messageEl.textContent = "Nie masz wystarczająco pieniędzy!";
-        return;
-    }
-
-    // 3. Odejmij zakład i zablokuj przycisk
-    playerData.money -= bet;
-    spinButton.disabled = true;
-    messageEl.textContent = "Kręcę...";
-
-    // 4. Rozpocznij animację kręcenia
-    startSpinningAnimation();
-
-    // 5. Losowanie wyników
-    // Używamy losowania opartego na tablicy 'symbols'
-    const result1 = symbols[Math.floor(Math.random() * symbols.length)];
-    const result2 = symbols[Math.floor(Math.random() * symbols.length)];
-    const result3 = symbols[Math.floor(Math.random() * symbols.length)];
     
-    const results = [result1, result2, result3];
+    console.log('Creating 3x3 grid...');
+    container.innerHTML = '';
+    gridCells = [];
+    currentSymbols = [];
+    
+    // Force grid display
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = 'repeat(3, 1fr)';
+    container.style.gridTemplateRows = 'repeat(3, 1fr)';
+    container.style.gap = '10px';
+    
+    for (let i = 0; i < 9; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'slot-cell';
+        cell.dataset.index = i;
+        cell.style.display = 'flex';
+        cell.style.position = 'relative';
+        
+        const indexLabel = document.createElement('span');
+        indexLabel.className = 'slot-cell-index';
+        indexLabel.textContent = i;
+        
+        const symbol = document.createElement('span');
+        symbol.className = 'slot-symbol';
+        symbol.textContent = '🎰';
+        symbol.style.fontSize = '3rem';
+        
+        cell.appendChild(indexLabel);
+        cell.appendChild(symbol);
+        container.appendChild(cell);
+        
+        gridCells.push(cell);
+        currentSymbols.push('🎰');
+    }
+    
+    console.log('Grid created with', gridCells.length, 'cells');
+    console.log('Container children:', container.children.length);
+    return true;
+}
 
-    // 6. Zatrzymaj animację po 2 sekundach i pokaż wyniki
+// Update balance display
+function updateBalance() {
+    const playerData = JSON.parse(localStorage.getItem('casinoUser') || 'null');
+    const balanceEl = document.getElementById('slot-balance');
+    if (balanceEl && playerData) {
+        balanceEl.textContent = playerData.money || 0;
+    }
+}
+
+// Handle spin
+function handleSpin() {
+    if (isSpinning) return;
+    
+    const playerData = JSON.parse(localStorage.getItem('casinoUser') || 'null');
+    if (!playerData) {
+        alert('Please log in first');
+        return;
+    }
+    
+    const betInput = document.getElementById('slot-bet-amount');
+    const bet = parseInt(betInput?.value || 0);
+    
+    if (bet <= 0 || playerData.money < bet) {
+        const msg = document.getElementById('slot-result-message');
+        if (msg) msg.textContent = bet <= 0 ? 'Please enter a valid bet!' : 'Insufficient balance!';
+        return;
+    }
+    
+    // Ensure grid exists
+    if (gridCells.length !== 9) {
+        if (!createGrid()) return;
+    }
+    
+    // Deduct bet
+    playerData.money -= bet;
+    localStorage.setItem('casinoUser', JSON.stringify(playerData));
+    updateHeader(playerData.name, playerData.money);
+    updateBalance();
+    
+    // Start spin
+    isSpinning = true;
+    const spinBtn = document.getElementById('slot-spin-button');
+    if (spinBtn) spinBtn.disabled = true;
+    
+    const msg = document.getElementById('slot-result-message');
+    if (msg) msg.textContent = 'Spinning...';
+    
+    // Animation
+    animationInterval = setInterval(() => {
+        gridCells.forEach(cell => {
+            cell.classList.add('spinning');
+            const symbol = cell.querySelector('.slot-symbol');
+            if (symbol) symbol.textContent = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+        });
+    }, 100);
+    
+    // Stop after 2 seconds
     setTimeout(() => {
-        stopSpinningAnimation();
+        if (animationInterval) {
+            clearInterval(animationInterval);
+            animationInterval = null;
+        }
         
-        // Wyświetl wyniki
-        reel1.textContent = result1;
-        reel2.textContent = result2;
-        reel3.textContent = result3;
-
-        // Sprawdź wygraną
-        const winnings = checkWinnings(results, bet);
-
-        if (winnings > 0) {
-            messageEl.textContent = `Wygrałeś ${winnings}!`;
-            playerData.money += winnings;
-            showWinAnimation();
+        gridCells.forEach(cell => cell.classList.remove('spinning'));
         
-            // Aktualizuj maksymalny wynik (maxScore) w Firestore
+        // Generate results
+        for (let i = 0; i < 9; i++) {
+            currentSymbols[i] = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+            const symbol = gridCells[i].querySelector('.slot-symbol');
+            if (symbol) symbol.textContent = currentSymbols[i];
+        }
+        
+        // Check wins
+        const wins = [];
+        let totalWin = 0;
+        
+        WINNING_LINES.forEach((line, idx) => {
+            const [a, b, c] = line.map(i => currentSymbols[i]);
+            if (a === b && b === c) {
+                const mult = PAYOUTS[a] || 0;
+                const win = bet * mult;
+                wins.push({ line: idx + 1, indices: line, symbol: a, win });
+                totalWin += win;
+            }
+        });
+        
+        // Apply winnings
+        if (totalWin > 0) {
+            playerData.money += totalWin;
+            localStorage.setItem('casinoUser', JSON.stringify(playerData));
+            updateHeader(playerData.name, playerData.money);
+            updateBalance();
+            
             if (playerData.uid && playerData.name) {
                 saveScore(playerData.uid, playerData.name, playerData.money);
             }
-        
+            
+            // Highlight winners
+            const winningIndices = new Set();
+            wins.forEach(w => w.indices.forEach(i => winningIndices.add(i)));
+            winningIndices.forEach(i => {
+                if (gridCells[i]) gridCells[i].classList.add('winning');
+            });
+            
+            setTimeout(() => {
+                gridCells.forEach(c => c.classList.remove('winning'));
+            }, 2000);
+            
+            // Show results
+            const lastWin = document.getElementById('slot-last-win');
+            if (lastWin) lastWin.textContent = totalWin;
+            
+            const winLines = document.getElementById('slot-winning-lines');
+            if (winLines) {
+                winLines.innerHTML = '<div style="font-weight:bold;margin-bottom:5px;">Winning Lines:</div>' +
+                    wins.map(w => `<div class="winning-line-item">Line ${w.line} (${w.indices.join('-')}): +${w.win}</div>`).join('');
+            }
+            
+            if (msg) msg.textContent = `You won ${totalWin}!`;
         } else {
-            messageEl.textContent = "Próbuj dalej!";
+            const lastWin = document.getElementById('slot-last-win');
+            if (lastWin) lastWin.textContent = '0';
+            const winLines = document.getElementById('slot-winning-lines');
+            if (winLines) winLines.innerHTML = '';
+            if (msg) msg.textContent = 'No win this time. Try again!';
         }
-
-        // Zapisz nowy stan kasy i zaktualizuj UI
-        localStorage.setItem('casinoUser', JSON.stringify(playerData));
-        updateHeader(playerData.name, playerData.money);
-        spinButton.disabled = false;
-
-    }, 2000); // Kręcenie przez 2 sekundy
+        
+        isSpinning = false;
+        if (spinBtn) spinBtn.disabled = false;
+    }, 2000);
 }
 
-function startSpinningAnimation() {
-    // Dodaj klasę spinning do wszystkich bębnów
-    reel1.classList.add('spinning');
-    reel2.classList.add('spinning');
-    reel3.classList.add('spinning');
-
-    // Animacja szybkiej zmiany symboli
-    const animationInterval = setInterval(() => {
-        reel1.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-        reel2.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-        reel3.textContent = symbols[Math.floor(Math.random() * symbols.length)];
-    }, 100);
+// Initialize when view is shown
+function initSlot() {
+    const view = document.getElementById('slot-game-view');
+    if (!view) {
+        console.log('slot-game-view not found');
+        return;
+    }
     
-    // Zapisz interval ID do późniejszego wyczyszczenia
-    window.slotAnimationInterval = animationInterval;
-}
-
-function stopSpinningAnimation() {
-    // Usuń klasę spinning
-    reel1.classList.remove('spinning');
-    reel2.classList.remove('spinning');
-    reel3.classList.remove('spinning');
+    if (view.classList.contains('hidden')) {
+        console.log('slot-game-view is hidden');
+        return;
+    }
     
-    // Wyczyść interval
-    if (window.slotAnimationInterval) {
-        clearInterval(window.slotAnimationInterval);
-        window.slotAnimationInterval = null;
+    console.log('Initializing slot - view is visible');
+    
+    const container = document.getElementById('slot-grid-3x3');
+    if (!container) {
+        console.error('slot-grid-3x3 container not found in initSlot!');
+        return;
+    }
+    
+    if (gridCells.length !== 9 || container.children.length !== 9) {
+        console.log('Creating grid - current cells:', gridCells.length, 'container children:', container.children.length);
+        createGrid();
+    } else {
+        console.log('Grid already exists');
+    }
+    
+    updateBalance();
+    
+    const spinBtn = document.getElementById('slot-spin-button');
+    if (spinBtn && !spinBtn.hasAttribute('data-slot-init')) {
+        spinBtn.addEventListener('click', handleSpin);
+        spinBtn.setAttribute('data-slot-init', 'true');
+        console.log('Spin button listener attached');
     }
 }
 
-function showWinAnimation() {
-    // Dodaj klasę win do bębnów na krótko
-    reel1.classList.add('win');
-    reel2.classList.add('win');
-    reel3.classList.add('win');
+// Watch for view changes - simple approach
+function watchView() {
+    // Check immediately
+    setTimeout(initSlot, 100);
     
-    setTimeout(() => {
-        reel1.classList.remove('win');
-        reel2.classList.remove('win');
-        reel3.classList.remove('win');
-    }, 600);
+    // Watch for class changes
+    const view = document.getElementById('slot-game-view');
+    if (view) {
+        const observer = new MutationObserver(() => {
+            setTimeout(initSlot, 100);
+        });
+        observer.observe(view, { attributes: true, attributeFilter: ['class'] });
+    }
+    
+    // Periodic check
+    setInterval(initSlot, 1000);
+    
+    // Hook showView
+    const original = window.showView;
+    if (typeof original === 'function') {
+        window.showView = function(viewId) {
+            original.apply(this, arguments);
+            if (viewId === 'slot-game-view') {
+                setTimeout(initSlot, 200);
+            }
+        };
+    }
 }
 
-// --- NOWA FUNKCJA checkWinnings ---
-// Zawiera logikę, o którą prosiłeś
-function checkWinnings(results, bet) {
-    const [r1, r2, r3] = results;
-
-    // 1. Trzy takie same
-    if (r1 === r2 && r2 === r3) {
-        switch (r1) {
-            case '🍒': return bet * 4;   // 3 wiśnie
-            case '🍋': return bet * 4;   // 3 cytryny
-            case '🍉': return bet * 16;  // 3 arbuzy
-            case '🔔': return bet * 20;  // 3 dzwonki
-            case '7️⃣': return bet * 50; // 3 siódemki
-            case '💎': return bet * 4;   // 3 diamenty
-            default: return 0;
-        }
-    }
-
-    // 2. Dokładnie dwa diamenty, trzeci inny
-    const diamondCount = results.filter(s => s === '💎').length;
-    if (diamondCount === 2) {
-        return bet * 2;
-    }
-
-    // 3. Brak wygranej
-    return 0;
+// Start watching
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', watchView);
+} else {
+    watchView();
 }

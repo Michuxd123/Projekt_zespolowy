@@ -102,16 +102,20 @@
         <section id="slot-game-view" class="view hidden">
             <h2>Gra - Automat 🎰</h2>
             
-            <div id="slot-machine">
-                <div class="reel" id="reel1">🍒</div>
-                <div class="reel" id="reel2">🍋</div>
-                <div class="reel" id="reel3">🔔</div>
+            <div id="slot-machine-container">
+                <div id="slot-grid-3x3"></div>
             </div>
             
             <div id="slot-controls">
-                <label for="bet-amount">Zakład:</label>
-                <input type="number" id="bet-amount" value="10" min="1">
-                <button id="spin-button">Zakręć!</button>
+                <label for="slot-bet-amount">Bet:</label>
+                <input type="number" id="slot-bet-amount" value="10" min="1">
+                <button id="slot-spin-button">SPIN</button>
+            </div>
+            
+            <div id="slot-info-panel">
+                <div>Balance: <span id="slot-balance">0</span></div>
+                <div>Last Win: <span id="slot-last-win">0</span></div>
+                <div id="slot-winning-lines"></div>
             </div>
             
             <p id="slot-result-message"></p>
@@ -144,7 +148,7 @@
     <script type="module" src="js/firebaseConfig.js?v=3"></script>
     <script type="module" src="js/leaderboard.js?v=3"></script>
     <script type="module" src="js/auth.js?v=3"></script>
-    <script type="module" src="js/games/slot.js?v=0.2.2"></script>
+    <script type="module" src="js/games/slot.js?v=3.0.0"></script>
     <script type="module" src="js/games/blackjack.js?v=0.4.6"></script>
     <script type="module" src="js/games/roulette.js?v=0.0.1"></script>
     

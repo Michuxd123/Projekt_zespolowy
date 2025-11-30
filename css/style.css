@@ -213,3 +213,109 @@ header {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
+
+/* 3x3 Slot Machine Styles */
+#slot-machine-container {
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+    min-height: 350px;
+    width: 100%;
+}
+
+#slot-grid-3x3 {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-rows: repeat(3, 1fr) !important;
+    gap: 10px !important;
+    max-width: 400px;
+    width: 100%;
+    margin: 20px auto;
+    min-height: 320px;
+    padding: 10px;
+    visibility: visible !important;
+    opacity: 1 !important;
+    box-sizing: border-box;
+}
+
+.slot-cell {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border: 3px solid #555;
+    background: white;
+    border-radius: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.slot-cell-index {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    font-size: 0.7rem;
+    color: #666;
+    font-weight: bold;
+    background: rgba(255, 255, 255, 0.8);
+    padding: 2px 4px;
+    border-radius: 3px;
+}
+
+.slot-cell.spinning {
+    filter: blur(3px);
+    animation: slotShake 0.08s linear infinite;
+    background: linear-gradient(45deg, #ffeb3b, #ff9800);
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
+}
+
+@keyframes slotShake {
+    0% { transform: translateY(-3px) rotate(-1deg); }
+    25% { transform: translateY(3px) rotate(1deg); }
+    50% { transform: translateY(-2px) rotate(-0.5deg); }
+    75% { transform: translateY(2px) rotate(0.5deg); }
+    100% { transform: translateY(-3px) rotate(-1deg); }
+}
+
+.slot-cell.winning {
+    animation: slotWinPulse 0.8s ease-in-out;
+    background: linear-gradient(45deg, #4caf50, #8bc34a);
+    box-shadow: 0 0 20px rgba(76, 175, 80, 0.7);
+    border-color: #2e7d32;
+}
+
+@keyframes slotWinPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+    100% { transform: scale(1); }
+}
+
+#slot-info-panel {
+    margin: 20px auto;
+    padding: 15px;
+    background: #f9f9f9;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    max-width: 400px;
+    text-align: left;
+}
+
+#slot-info-panel > div {
+    margin: 8px 0;
+    font-weight: bold;
+}
+
+#slot-winning-lines {
+    margin-top: 10px;
+    font-size: 0.9rem;
+}
+
+.winning-line-item {
+    color: #2e7d32;
+    margin: 4px 0;
+}

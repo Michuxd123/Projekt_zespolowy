@@ -11,6 +11,13 @@ export function showView(viewId) {
     if (targetView) {
         targetView.classList.remove('hidden');
         targetView.classList.add('active');
+        
+        // Initialize slot if slot view is shown
+        if (viewId === 'slot-game-view' && window.initializeSlotGame) {
+            setTimeout(() => {
+                window.initializeSlotGame();
+            }, 100);
+        }
     }
 }
 
