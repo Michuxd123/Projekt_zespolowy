@@ -41,8 +41,7 @@ const els = {
   inputRaise: document.getElementById('raise-amount'),
   msg: document.getElementById('message-box'),
   nextBtn: document.getElementById('next-hand-btn'),
-  balanceDisplay: document.getElementById('current-balance-display'), // <--- TUTAJ BRAKOWAŁO PRZECINKA
-
+  balanceDisplay: document.getElementById('current-balance-display'),
   infoBtn: document.getElementById('info-btn'),
   closeRulesBtn: document.getElementById('close-rules-btn')
 };
@@ -123,6 +122,8 @@ function initGame() {
   els.setup.style.display = 'none';
   els.table.style.display = 'flex';
   
+  if (els.infoBtn) els.infoBtn.style.display = 'flex';
+
   render();
   startRound();
 }
@@ -148,7 +149,6 @@ function dealCard() {
 function startRound() {
   dealerIndex = (dealerIndex + 1) % 2;
 
-  // --- WARUNEK PRZEGRANEJ GRACZA ---
   if (players[0].money < minBet) {
     alert('Przegrałeś żetony na stole! Koniec gry.');
     
@@ -163,12 +163,12 @@ function startRound() {
         els.balanceDisplay.textContent = user.money + "$";
     }
 
+    if (els.infoBtn) els.infoBtn.style.display = 'none';
     document.body.classList.remove('rules-open');
 
     return;
   }
   
-  // --- WARUNEK PRZEGRANEJ KOMPUTERA ---
   if (players[1].money < minBet) {
       alert("Komputer zbankrutował! Wygrałeś wszystko ze stołu.");
       saveGameResult();
@@ -181,6 +181,7 @@ function startRound() {
         els.balanceDisplay.textContent = user.money + "$";
       }
 
+      if (els.infoBtn) els.infoBtn.style.display = 'none';
       document.body.classList.remove('rules-open');
 
       return;
@@ -435,7 +436,7 @@ function cpuDecision(idx) {
 function quickHandEval(cards) {
   const ranks = cards.map(c => c.rank);
   const suitsCount = {};
-  // ranks.forEach(r => {}); // Usunięta pusta pętla
+  
   cards.forEach(c => suitsCount[c.suit] = (suitsCount[c.suit] || 0) + 1);
   
   const counts = {};
