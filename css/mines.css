@@ -1,0 +1,194 @@
+/* Układ główny gry Mines */
+#mines-game-view {
+    display: none;
+    align-items: center; /* Centrowanie w pionie */
+    justify-content: center; /* Centrowanie w poziomie */
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    width: 100%;
+    min-height: 80vh; /* Zapewnia wysokość widoku */
+}
+
+#mines-game-view.active {
+    display: flex;
+    flex-direction: column;
+}
+
+.mines-layout {
+    display: flex;
+    gap: 30px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start; /* Ważne: zapobiega rozciąganiu elementów */
+    width: 100%;
+    max-width: 1000px;
+}
+
+/* Panel boczny */
+.mines-sidebar {
+    background: #2c3e50;
+    padding: 20px;
+    border-radius: 15px;
+    width: 280px; /* Trochę szerszy panel */
+    border: 2px solid #34495e;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    flex-shrink: 0; /* Zapobiega ściskaniu panelu */
+}
+
+.mines-input-group {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.mines-input-group label {
+    font-size: 0.9em;
+    color: #bdc3c7;
+    margin-bottom: 5px;
+}
+
+.mines-input-group input, 
+.mines-input-group select {
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #7f8c8d;
+    background: #34495e;
+    color: white;
+    font-size: 1em;
+}
+
+/* Przyciski */
+.mines-btn {
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 1.1em;
+    transition: transform 0.1s, filter 0.2s;
+}
+
+.mines-btn:active {
+    transform: scale(0.95);
+}
+
+.action-btn {
+    background-color: #27ae60;
+    color: white;
+    box-shadow: 0 4px 0 #1e8449;
+}
+.action-btn:hover { background-color: #2ecc71; }
+
+.cashout-btn {
+    background-color: #f39c12;
+    color: black;
+    box-shadow: 0 4px 0 #d35400;
+    width: 100%;
+    margin-top: 10px;
+}
+.cashout-btn:hover { background-color: #f1c40f; }
+
+/* Info o wygranej */
+.profit-info {
+    display: flex;
+    justify-content: space-between;
+    background: rgba(0,0,0,0.2);
+    padding: 8px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+}
+
+.mines-message {
+    text-align: center;
+    font-size: 0.9em;
+    color: #ecf0f1;
+    min-height: 1.2em;
+    margin-top: 10px;
+}
+
+/* --- NAPRAWA PLANSZY --- */
+.mines-board-container {
+    background: #2c3e50;
+    padding: 20px;
+    border-radius: 15px;
+    border: 2px solid #34495e;
+    
+    /* Gwarancja, że kontener ma odpowiedni rozmiar */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 320px;
+    min-height: 320px;
+}
+
+#mines-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5 równych kolumn */
+    gap: 10px;
+    
+    /* Sztywne określenie szerokości siatki naprawia problem znikania */
+    width: 100%;
+    max-width: 400px; 
+    
+    /* Height auto pozwala siatce urosnąć w zależności od aspect-ratio kafelków */
+    height: auto;
+}
+
+.mine-tile {
+    background-color: #34495e;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+    
+    /* Centrowanie emoji */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    font-size: 2em; /* Rozmiar emoji */
+    line-height: 1;
+    user-select: none;
+    box-shadow: inset 0 -4px 0 rgba(0,0,0,0.2);
+
+    /* TO JEST KLUCZOWE DLA KWADRATÓW */
+    width: 100%; 
+    aspect-ratio: 1 / 1; /* Wymusza proporcje 1:1 */
+}
+
+/* Efekt najechania */
+.mine-tile.active:hover {
+    background-color: #3e5871;
+    transform: translateY(-2px);
+}
+
+/* Odkryte kafelki */
+.mine-tile.revealed {
+    background-color: #2c3e50;
+    box-shadow: none;
+    cursor: default;
+    animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border: 1px solid #465f75; /* Delikatna ramka dla odkrytych */
+}
+
+.mine-tile.gem {
+    background-color: #27ae60;
+    box-shadow: inset 0 0 15px #2ecc71;
+    border-color: #2ecc71;
+}
+
+.mine-tile.bomb {
+    background-color: #c0392b;
+    border-color: #e74c3c;
+}
+
+.mine-tile.dimmed {
+    opacity: 0.3;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0); }
+    100% { transform: scale(1); }
+}
