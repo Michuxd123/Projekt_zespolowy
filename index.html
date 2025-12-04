@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/blackjack.css">
     <link rel="stylesheet" href="css/roulette.css">
     <link rel="stylesheet" href="css/poker.css">
+    <link rel="stylesheet" href="css/mines.css">
     <script type="importmap">
     {
       "imports": {
@@ -51,6 +52,7 @@
             <button class="game-button" data-view="blackjack-game">Blackjack</button>
             <button class="game-button" data-view="roulette-game">Ruletka</button>
             <button class="game-button" data-view="poker-game">Poker Texas Hold'em</button>
+            <button class="game-button" data-view="mines-game">Mines (Miny)</button>
         </section>
         
         <section id="roulette-game-view" class="view hidden">
@@ -346,6 +348,53 @@
     </div>
 </div>
 
+<section id="mines-game-view" class="view hidden">
+    <h2>Gra - Mines 💣</h2>
+    
+    <div class="mines-layout">
+        <div class="mines-sidebar">
+            <div class="mines-input-group">
+                <label>Stawka:</label>
+                <input type="number" id="mines-bet" value="10" min="1">
+            </div>
+
+            <div class="mines-input-group">
+                <label>Ilość min (1-20):</label>
+                <select id="mines-count-select">
+                    <option value="1">1 mina</option>
+                    <option value="3" selected>3 miny</option>
+                    <option value="5">5 min</option>
+                    <option value="10">10 min</option>
+                    <option value="15">15 min</option>
+                    <option value="20">20 min (Hard)</option>
+                    <option value="24">24 miny (Impossible)</option>
+                </select>
+            </div>
+
+            <button id="mines-start-btn" class="mines-btn action-btn">Graj</button>
+            
+            <div id="mines-active-controls" style="display: none;">
+                <div class="profit-info">
+                    <span>Mnożnik:</span>
+                    <strong id="mines-current-multiplier">1.00x</strong>
+                </div>
+                <div class="profit-info">
+                    <span>Wygrana:</span>
+                    <strong id="mines-current-profit">0$</strong>
+                </div>
+                <button id="mines-cashout-btn" class="mines-btn cashout-btn">Wypłać</button>
+            </div>
+            
+            <p id="mines-msg" class="mines-message">Postaw zakład, aby zacząć.</p>
+        </div>
+
+        <div class="mines-board-container">
+            <div id="mines-grid">
+                </div>
+        </div>
+    </div>
+</section>
+
     </main> 
     
     <script type="module" src="js/ui.js?v=3"></script>
@@ -356,6 +405,7 @@
     <script type="module" src="js/games/blackjack.js?v=1.0"></script>
     <script type="module" src="js/games/roulette.js?v=0.1"></script>
     <script type="module" src="js/games/poker.js?=v1.0"></script>
+    <script type="module" src="js/games/mines.js?v=0.5"></script>
     
 </body>
 </html>
