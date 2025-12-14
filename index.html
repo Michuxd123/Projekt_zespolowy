@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/roulette.css">
     <link rel="stylesheet" href="css/poker.css">
     <link rel="stylesheet" href="css/mines.css">
+    <link rel="stylesheet" href="css/crash.css">
     <script type="importmap">
     {
       "imports": {
@@ -53,6 +54,7 @@
             <button class="game-button" data-view="roulette-game">Ruletka</button>
             <button class="game-button" data-view="poker-game">Poker Texas Hold'em</button>
             <button class="game-button" data-view="mines-game">Mines (Miny)</button>
+            <button class="game-button" data-view="crash-game">Aviator ✈️</button>
         </section>
         
         <section id="roulette-game-view" class="view hidden">
@@ -622,6 +624,116 @@
             </div>
         </div>
 
+        <section id="crash-game-view" class="view hidden">
+            <button id="crash-info-btn" class="info-toggle">
+                <span>i</span>
+            </button>
+            
+            <div class="crash-container">
+                <!-- Top Bar: History -->
+                <div class="crash-history-bar">
+                    <div class="crash-history-list" id="crash-history-list">
+                        <!-- History items will be added dynamically -->
+                    </div>
+                    <div class="crash-mode-label">FUN MODE</div>
+                </div>
+
+                <!-- Main Game Area -->
+                <div class="crash-game-area">
+                    <div class="crash-multiplier-display" id="crash-multiplier">1.00x</div>
+                    <div class="crash-countdown" id="crash-countdown"></div>
+                    
+                    <svg class="crash-graph" id="crash-graph" viewBox="0 0 800 400" preserveAspectRatio="none">
+                        <defs>
+                            <linearGradient id="crash-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ff4444;stop-opacity:0.8" />
+                                <stop offset="100%" style="stop-color:#ff0000;stop-opacity:0.3" />
+                            </linearGradient>
+                        </defs>
+                        <path id="crash-path" d="M 0 400" stroke="#ff4444" stroke-width="4" fill="url(#crash-gradient)" />
+                    </svg>
+                    
+                    <div class="crash-airplane" id="crash-airplane">✈️</div>
+                    
+                    <div class="crash-round-id-display">
+                        <span id="crash-round-id">#1</span>
+                    </div>
+                </div>
+
+                <!-- Bottom Bar: Betting Controls -->
+                <div class="crash-betting-panel">
+                    <div class="crash-bet-tabs">
+                        <button class="crash-tab active" id="crash-tab-bet">Bet</button>
+                        <button class="crash-tab" id="crash-tab-auto">Auto</button>
+                    </div>
+                    
+                    <div class="crash-bet-controls">
+                        <div class="crash-bet-input-group">
+                            <button class="crash-bet-btn" id="crash-bet-decrease">-</button>
+                            <input type="number" id="crash-bet-amount" class="crash-bet-input" value="10" min="1" step="1">
+                            <button class="crash-bet-btn" id="crash-bet-increase">+</button>
+                        </div>
+                        
+                        <div class="crash-quick-bets">
+                            <button class="crash-quick-bet" data-amount="1">1</button>
+                            <button class="crash-quick-bet" data-amount="2">2</button>
+                            <button class="crash-quick-bet" data-amount="5">5</button>
+                            <button class="crash-quick-bet" data-amount="10">10</button>
+                        </div>
+                        
+                        <button class="crash-bet-confirm" id="crash-bet-confirm-btn">Bet <span id="crash-bet-display">10</span> $</button>
+                    </div>
+                    
+                    <div class="crash-active-bet" id="crash-active-bet" style="display: none;">
+                        <div class="crash-bet-info">
+                            <div>Twój zakład: <strong id="crash-your-bet">0</strong>$</div>
+                            <div>Potencjalna wygrana: <strong id="crash-potential-win">0</strong>$</div>
+                        </div>
+                        <button class="crash-cashout-btn" id="crash-cashout-btn">Cashout</button>
+                        <button class="crash-stop-watching-btn" id="crash-stop-watching-btn" style="display: none;">Stop Watching</button>
+                        <button class="crash-play-again-btn" id="crash-play-again-btn" style="display: none;">Play Again</button>
+                    </div>
+                    
+                    <div class="crash-message" id="crash-message">Postaw zakład przed startem rundy</div>
+                </div>
+            </div>
+        </section>
+
+        <div id="crash-rules-sidebar" class="crash-rules-panel">
+            <div class="crash-rules-content">
+                <h2>Aviator - Zasady Gry</h2>
+                <p>Gra polega na przewidzeniu momentu, w którym samolot "spadnie". Postaw zakład i wypłać zanim samolot spadnie!</p>
+                
+                <h3>Przebieg rozgrywki:</h3>
+                <ol>
+                    <li>Pojawia się odliczanie (8-10 sekund) - w tym czasie musisz postawić zakład</li>
+                    <li>Po odliczaniu samolot startuje i mnożnik zaczyna rosnąć</li>
+                    <li>Mnożnik rośnie w czasie rzeczywistym (np. 1.00x → 1.50x → 2.00x...)</li>
+                    <li>W losowym momencie samolot "spada"</li>
+                    <li>Jeśli wypłacisz przed spadnięciem → wygrywasz: zakład × mnożnik</li>
+                    <li>Jeśli nie wypłacisz przed spadnięciem → tracisz zakład</li>
+                </ol>
+
+                <h3>Strategia:</h3>
+                <ul>
+                    <li><strong>Wcześniejsza wypłata = mniejsze ryzyko, mniejsza wygrana</strong></li>
+                    <li>Czekanie na wyższy mnożnik = większe ryzyko, większa wygrana</li>
+                    <li>Możesz ustawić automatyczną wypłatę (Auto) na wybranym mnożniku</li>
+                    <li>Pamiętaj: samolot może spaść w każdej chwili!</li>
+                </ul>
+
+                <h3>Przykład:</h3>
+                <p class="crash-note">Zakład: 10$<br>
+                Wypłacono przy mnożniku: 2.50x<br>
+                <strong>Wygrana: 25$ (10 × 2.50)</strong></p>
+                
+                <h3>Provably Fair:</h3>
+                <p class="crash-note">Każda runda jest weryfikowalna. Mnożnik spadnięcia jest generowany deterministycznie na podstawie seed i numeru rundy, co zapewnia uczciwość gry.</p>
+                
+                <button id="close-crash-rules-btn" class="close-rules">Zamknij</button>
+            </div>
+        </div>
+
     </main> 
     
     <script type="module" src="js/ui.js?v=3"></script>
@@ -633,6 +745,7 @@
     <script type="module" src="js/games/roulette.js?v=0.1"></script>
     <script type="module" src="js/games/poker.js?=v1.0"></script>
     <script type="module" src="js/games/mines.js?v=0.5"></script>
+    <script type="module" src="js/games/crash.js?v=1.0"></script>
     
 </body>
 </html>
