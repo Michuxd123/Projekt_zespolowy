@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="css/roulette.css">
     <link rel="stylesheet" href="css/poker.css">
     <link rel="stylesheet" href="css/mines.css">
+    <link rel="stylesheet" href="css/crash.css">
     <script type="importmap">
     {
       "imports": {
@@ -53,9 +54,14 @@
             <button class="game-button" data-view="roulette-game">Ruletka</button>
             <button class="game-button" data-view="poker-game">Poker Texas Hold'em</button>
             <button class="game-button" data-view="mines-game">Mines (Miny)</button>
+            <button class="game-button" data-view="crash-game">Aviator ✈️</button>
         </section>
         
         <section id="roulette-game-view" class="view hidden">
+            <button id="roulette-info-btn" class="info-toggle">
+                <span>i</span>
+            </button>
+            
             <h2>Gra - Ruletka </h2>
 
             <div id="roulette-wheel-area">
@@ -95,6 +101,70 @@
             <p id="roulette-message"></p>
         </section>
 
+        <div id="roulette-rules-sidebar" class="roulette-rules-panel">
+            <div class="roulette-rules-content">
+                <h2>Ruletka - Zasady i Mnożniki</h2>
+                <p>Wybierz typ zakładu, postaw stawkę i zakręć kołem. Wygrywasz, jeśli trafisz na wybraną opcję!</p>
+                
+                <h3>Typy zakładów i mnożniki:</h3>
+                <ul class="roulette-payouts">
+                    <li class="payout-item">
+                        <div class="payout-info">
+                            <strong>Pojedyncza liczba (0-36)</strong>
+                            <span>36x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-info">
+                            <strong>Kolumna (Kol. 1, 2, 3)</strong>
+                            <span>3x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-info">
+                            <strong>Tuzin (1st 12, 2nd 12, 3rd 12)</strong>
+                            <span>3x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-info">
+                            <strong>Kolor (Czerwone / Czarne)</strong>
+                            <span>2x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-info">
+                            <strong>Połowa (1-18 / 19-36)</strong>
+                            <span>2x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-info">
+                            <strong>Parzyste / Nieparzyste</strong>
+                            <span>2x zakład</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <h3>Przebieg rozgrywki:</h3>
+                <ol>
+                    <li>Wybierz typ zakładu (kliknij na odpowiednie pole)</li>
+                    <li>Ustaw wysokość zakładu</li>
+                    <li>Kliknij "Zakręć!" aby rozpocząć</li>
+                    <li>Jeśli trafisz, wygrywasz zgodnie z mnożnikiem</li>
+                </ol>
+
+                <h3>Przykłady:</h3>
+                <ul>
+                    <li>Zakład 10$ na liczbę 7 → wygrana: 360$ (10 × 36)</li>
+                    <li>Zakład 10$ na kolor czerwony → wygrana: 20$ (10 × 2)</li>
+                    <li>Zakład 10$ na kolumnę 1 → wygrana: 30$ (10 × 3)</li>
+                </ul>
+                
+                <button id="close-roulette-rules-btn" class="close-rules">Zamknij</button>
+            </div>
+        </div>
+
         <section id="leaderboard-view" class="view hidden">
             <h2>Ranking</h2>
             <div id="leaderboard-container">
@@ -103,6 +173,10 @@
         </section>
 
         <section id="slot-game-view" class="view hidden">
+            <button id="slot-info-btn" class="info-toggle">
+                <span>i</span>
+            </button>
+            
             <h2>Gra - Automat 🎰</h2>
             
             <div id="slot-machine">
@@ -120,7 +194,78 @@
             <p id="slot-result-message"></p>
         </section>
 
+        <div id="slot-rules-sidebar" class="slot-rules-panel">
+            <div class="slot-rules-content">
+                <h2>Automat - Mnożniki Wyplatności</h2>
+                <p>Kombinacje wygrywające i ich mnożniki w zależności od wysokości zakładu:</p>
+                
+                <h3>Trzy jednakowe symbole:</h3>
+                <ul class="slot-payouts">
+                    <li class="payout-item">
+                        <div class="payout-symbols">7️⃣ 7️⃣ 7️⃣</div>
+                        <div class="payout-info">
+                            <strong>Trzy Siódemki</strong>
+                            <span>50x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-symbols">🔔 🔔 🔔</div>
+                        <div class="payout-info">
+                            <strong>Trzy Dzwonki</strong>
+                            <span>20x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-symbols">🍉 🍉 🍉</div>
+                        <div class="payout-info">
+                            <strong>Trzy Arbuzy</strong>
+                            <span>16x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-symbols">🍒 🍒 🍒</div>
+                        <div class="payout-info">
+                            <strong>Trzy Wiśnie</strong>
+                            <span>4x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-symbols">🍋 🍋 🍋</div>
+                        <div class="payout-info">
+                            <strong>Trzy Cytryny</strong>
+                            <span>4x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-symbols">💎 💎 💎</div>
+                        <div class="payout-info">
+                            <strong>Trzy Diamenty</strong>
+                            <span>4x zakład</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <h3>Kombinacje specjalne:</h3>
+                <ul class="slot-payouts">
+                    <li class="payout-item">
+                        <div class="payout-symbols">💎 💎 ?</div>
+                        <div class="payout-info">
+                            <strong>Dwa Diamenty</strong>
+                            <span>2x zakład</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <p class="slot-note"><strong>Uwaga:</strong> Wszystkie wygrane są obliczane na podstawie wysokości zakładu. Na przykład, jeśli postawisz 10$ i otrzymasz trzy siódemki, wygrywasz 500$ (10 × 50).</p>
+                
+                <button id="close-slot-rules-btn" class="close-rules">Zamknij</button>
+            </div>
+        </div>
+
         <section id="blackjack-game-view" class="view hidden">
+            <button id="blackjack-info-btn" class="info-toggle">
+                <span>i</span>
+            </button>
             <h3>Blackjack ♠️</h3>
             <h3>Dealer: <span id="dealer-sum"></span></h3>
             <div id="dealer-cards">
@@ -139,6 +284,47 @@
             <p id="results"></p>
             
         </section>
+
+        <div id="blackjack-rules-sidebar" class="blackjack-rules-panel">
+            <div class="blackjack-rules-content">
+                <h2>Blackjack - Zasady Gry</h2>
+                <p>Celem gry jest uzyskanie sumy kart jak najbliższej 21, ale nie przekraczającej tej wartości.</p>
+                
+                <h3>Przebieg rozgrywki:</h3>
+                <ol>
+                    <li>Postaw zakład i rozpocznij nową rundę</li>
+                    <li>Otrzymujesz 2 karty, krupier również (jedna zakryta)</li>
+                    <li>Możesz dobrać więcej kart (Dobierz) lub zatrzymać się (Stój)</li>
+                    <li>Jeśli przekroczysz 21, przegrywasz (Fura)</li>
+                    <li>Wygrywa ten, kto ma sumę bliższą 21</li>
+                </ol>
+
+                <h3>Wartości kart:</h3>
+                <ul>
+                    <li>Karty 2-10: wartość nominalna</li>
+                    <li>Walet, Dama, Król: 10 punktów</li>
+                    <li>As: 11 punktów (lub 1, jeśli przekroczenie 21)</li>
+                </ul>
+
+                <h3>Wyniki i wygrane:</h3>
+                <ul class="blackjack-payouts">
+                    <li class="payout-item">
+                        <strong>Wygrana:</strong> <span>2x zakład</span>
+                    </li>
+                    <li class="payout-item">
+                        <strong>Remis:</strong> <span>Zwrot zakładu</span>
+                    </li>
+                    <li class="payout-item">
+                        <strong>Przegrana (Fura):</strong> <span>Utrata zakładu</span>
+                    </li>
+                    <li class="payout-item">
+                        <strong>Blackjack (21):</strong> <span>Automatyczna wygrana</span>
+                    </li>
+                </ul>
+                
+                <button id="close-blackjack-rules-btn" class="close-rules">Zamknij</button>
+            </div>
+        </div>
 
         <section id="poker-game-view" class="view hidden">
             <div class="poker-container">
@@ -349,6 +535,10 @@
 </div>
 
 <section id="mines-game-view" class="view hidden">
+    <button id="mines-info-btn" class="info-toggle">
+        <span>i</span>
+    </button>
+    
     <h2>Gra - Mines 💣</h2>
     
     <div class="mines-layout">
@@ -395,6 +585,155 @@
     </div>
 </section>
 
+        <div id="mines-rules-sidebar" class="mines-rules-panel">
+            <div class="mines-rules-content">
+                <h2>Mines - Zasady Gry</h2>
+                <p>Gra polega na odkrywaniu bezpiecznych pól z diamentami, unikając min. Mnożnik rośnie z każdym odkrytym diamentem!</p>
+                
+                <h3>Przebieg rozgrywki:</h3>
+                <ol>
+                    <li>Wybierz stawkę i liczbę min (1-24)</li>
+                    <li>Kliknij "Graj" aby rozpocząć</li>
+                    <li>Klikaj na pola, aby odkrywać diamenty 💎</li>
+                    <li>Mnożnik rośnie z każdym odkrytym diamentem</li>
+                    <li>Możesz wypłacić w każdej chwili (przycisk "Wypłać")</li>
+                    <li>Trafienie na minę 💣 = przegrana całego zakładu</li>
+                </ol>
+
+                <h3>Jak działa mnożnik:</h3>
+                <ul>
+                    <li>Mnożnik zaczyna od 1.00x</li>
+                    <li>Z każdym odkrytym diamentem mnożnik rośnie</li>
+                    <li>Im więcej min, tym szybciej rośnie mnożnik</li>
+                    <li>Wygrana = stawka × aktualny mnożnik</li>
+                </ul>
+
+                <h3>Strategia:</h3>
+                <ul>
+                    <li><strong>Więcej min = wyższy mnożnik, ale większe ryzyko</strong></li>
+                    <li>Odkryj wszystkie bezpieczne pola = automatyczna wypłata</li>
+                    <li>Możesz wypłacić w każdej chwili, zanim trafisz na minę</li>
+                    <li>Pamiętaj: im dalej idziesz, tym większe ryzyko!</li>
+                </ul>
+
+                <h3>Przykład:</h3>
+                <p class="mines-note">Stawka: 10$, odkryto 5 diamentów, mnożnik: 2.50x<br>
+                <strong>Wygrana: 25$ (10 × 2.50)</strong></p>
+                
+                <button id="close-mines-rules-btn" class="close-rules">Zamknij</button>
+            </div>
+        </div>
+
+        <section id="crash-game-view" class="view hidden">
+            <button id="crash-info-btn" class="info-toggle">
+                <span>i</span>
+            </button>
+            
+            <div class="crash-container">
+                <!-- Top Bar: History -->
+                <div class="crash-history-bar">
+                    <div class="crash-history-list" id="crash-history-list">
+                        <!-- History items will be added dynamically -->
+                    </div>
+                    <div class="crash-mode-label">FUN MODE</div>
+                </div>
+
+                <!-- Main Game Area -->
+                <div class="crash-game-area">
+                    <div class="crash-multiplier-display" id="crash-multiplier">1.00x</div>
+                    <div class="crash-countdown" id="crash-countdown"></div>
+                    
+                    <svg class="crash-graph" id="crash-graph" viewBox="0 0 800 400" preserveAspectRatio="none">
+                        <defs>
+                            <linearGradient id="crash-gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                                <stop offset="0%" style="stop-color:#ff4444;stop-opacity:0.8" />
+                                <stop offset="100%" style="stop-color:#ff0000;stop-opacity:0.3" />
+                            </linearGradient>
+                        </defs>
+                        <path id="crash-path" d="M 0 400" stroke="#ff4444" stroke-width="4" fill="url(#crash-gradient)" />
+                    </svg>
+                    
+                    <div class="crash-airplane" id="crash-airplane">✈️</div>
+                    
+                    <div class="crash-round-id-display">
+                        <span id="crash-round-id">#1</span>
+                    </div>
+                </div>
+
+                <!-- Bottom Bar: Betting Controls -->
+                <div class="crash-betting-panel">
+                    <div class="crash-bet-tabs">
+                        <button class="crash-tab active" id="crash-tab-bet">Bet</button>
+                        <button class="crash-tab" id="crash-tab-auto">Auto</button>
+                    </div>
+                    
+                    <div class="crash-bet-controls">
+                        <div class="crash-bet-input-group">
+                            <button class="crash-bet-btn" id="crash-bet-decrease">-</button>
+                            <input type="number" id="crash-bet-amount" class="crash-bet-input" value="10" min="1" step="1">
+                            <button class="crash-bet-btn" id="crash-bet-increase">+</button>
+                        </div>
+                        
+                        <div class="crash-quick-bets">
+                            <button class="crash-quick-bet" data-amount="1">1</button>
+                            <button class="crash-quick-bet" data-amount="2">2</button>
+                            <button class="crash-quick-bet" data-amount="5">5</button>
+                            <button class="crash-quick-bet" data-amount="10">10</button>
+                        </div>
+                        
+                        <button class="crash-bet-confirm" id="crash-bet-confirm-btn">Bet <span id="crash-bet-display">10</span> $</button>
+                    </div>
+                    
+                    <div class="crash-active-bet" id="crash-active-bet" style="display: none;">
+                        <div class="crash-bet-info">
+                            <div>Twój zakład: <strong id="crash-your-bet">0</strong>$</div>
+                            <div>Potencjalna wygrana: <strong id="crash-potential-win">0</strong>$</div>
+                        </div>
+                        <button class="crash-cashout-btn" id="crash-cashout-btn">Cashout</button>
+                        <button class="crash-stop-watching-btn" id="crash-stop-watching-btn" style="display: none;">Stop Watching</button>
+                        <button class="crash-play-again-btn" id="crash-play-again-btn" style="display: none;">Play Again</button>
+                    </div>
+                    
+                    <div class="crash-message" id="crash-message">Postaw zakład przed startem rundy</div>
+                </div>
+            </div>
+        </section>
+
+        <div id="crash-rules-sidebar" class="crash-rules-panel">
+            <div class="crash-rules-content">
+                <h2>Aviator - Zasady Gry</h2>
+                <p>Gra polega na przewidzeniu momentu, w którym samolot "spadnie". Postaw zakład i wypłać zanim samolot spadnie!</p>
+                
+                <h3>Przebieg rozgrywki:</h3>
+                <ol>
+                    <li>Pojawia się odliczanie (8-10 sekund) - w tym czasie musisz postawić zakład</li>
+                    <li>Po odliczaniu samolot startuje i mnożnik zaczyna rosnąć</li>
+                    <li>Mnożnik rośnie w czasie rzeczywistym (np. 1.00x → 1.50x → 2.00x...)</li>
+                    <li>W losowym momencie samolot "spada"</li>
+                    <li>Jeśli wypłacisz przed spadnięciem → wygrywasz: zakład × mnożnik</li>
+                    <li>Jeśli nie wypłacisz przed spadnięciem → tracisz zakład</li>
+                </ol>
+
+                <h3>Strategia:</h3>
+                <ul>
+                    <li><strong>Wcześniejsza wypłata = mniejsze ryzyko, mniejsza wygrana</strong></li>
+                    <li>Czekanie na wyższy mnożnik = większe ryzyko, większa wygrana</li>
+                    <li>Możesz ustawić automatyczną wypłatę (Auto) na wybranym mnożniku</li>
+                    <li>Pamiętaj: samolot może spaść w każdej chwili!</li>
+                </ul>
+
+                <h3>Przykład:</h3>
+                <p class="crash-note">Zakład: 10$<br>
+                Wypłacono przy mnożniku: 2.50x<br>
+                <strong>Wygrana: 25$ (10 × 2.50)</strong></p>
+                
+                <h3>Provably Fair:</h3>
+                <p class="crash-note">Każda runda jest weryfikowalna. Mnożnik spadnięcia jest generowany deterministycznie na podstawie seed i numeru rundy, co zapewnia uczciwość gry.</p>
+                
+                <button id="close-crash-rules-btn" class="close-rules">Zamknij</button>
+            </div>
+        </div>
+
     </main> 
     
     <script type="module" src="js/ui.js?v=3"></script>
@@ -406,6 +745,7 @@
     <script type="module" src="js/games/roulette.js?v=0.1"></script>
     <script type="module" src="js/games/poker.js?=v1.0"></script>
     <script type="module" src="js/games/mines.js?v=0.5"></script>
+    <script type="module" src="js/games/crash.js?v=1.0"></script>
     
 </body>
 </html>

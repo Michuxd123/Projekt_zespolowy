@@ -29,6 +29,22 @@ let gameState = {
 if (els.btnStart) els.btnStart.addEventListener('click', startGame);
 if (els.btnCashout) els.btnCashout.addEventListener('click', cashOut);
 
+// Info button handlers
+const infoBtn = document.getElementById('mines-info-btn');
+const closeRulesBtn = document.getElementById('close-mines-rules-btn');
+
+if (infoBtn) {
+    infoBtn.addEventListener('click', toggleMinesRules);
+}
+
+if (closeRulesBtn) {
+    closeRulesBtn.addEventListener('click', toggleMinesRules);
+}
+
+function toggleMinesRules() {
+    document.body.classList.toggle('mines-rules-open');
+}
+
 // Inicjalizacja planszy (pusta na start)
 createGrid();
 
