@@ -59,18 +59,42 @@ body {
     transition: 0.3s;
 }
 
-#main-nav button:hover {
-    border-color: var(--gold);
-    color: var(--gold);
+#main-nav button {
+    background: linear-gradient(145deg, #ffd700, #b8860b) !important; /* Złote tło */
+    color: #000 !important; /* Czarny tekst */
+    border: none !important; /* Bez obramowania */
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3); /* Lekki cień */
+    transition: transform 0.2s, box-shadow 0.2s; /* Płynna animacja */
 }
 
-#logout-button {
-    border-color: var(--danger) !important;
-    color: var(--danger) !important;
+/* Efekt po najechaniu myszką */
+#main-nav button:hover {
+    background: linear-gradient(145deg, #ffe033, #d4a017) !important; /* Jaśniejszy złoty */
+    transform: translateY(-2px); /* Lekkie uniesienie */
+    box-shadow: 0 6px 12px rgba(255, 215, 0, 0.4); /* Złota poświata */
+    color: #000 !important;
 }
+
+/* Efekt kliknięcia */
+#main-nav button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+/* Wyjątek dla przycisku WYLOGUJ (zostawiamy go czerwonego, ale w nowym stylu) */
+#logout-button {
+    background: linear-gradient(145deg, #ff4444, #cc0000) !important; /* Czerwony gradient */
+    color: #fff !important; /* Biały tekst */
+    border: none !important;
+}
+
 #logout-button:hover {
-    background-color: var(--danger) !important;
-    color: white !important;
+    background: linear-gradient(145deg, #ff6666, #e60000) !important;
+    box-shadow: 0 6px 12px rgba(255, 68, 68, 0.4); /* Czerwona poświata */
 }
 
 main {
@@ -527,3 +551,40 @@ tr:nth-child(3) td:nth-child(1) { color: #CD7F32; font-size: 1.2em; }
     border-radius: 5px;
 }
 
+
+.nav-button {
+    background: linear-gradient(145deg, #ffd700, #b8860b);
+    color: #000;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-radius: 10px;
+    cursor: pointer;
+    margin: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+    min-width: 200px;
+    display: inline-block;
+}
+
+.nav-button:hover {
+    background: linear-gradient(145deg, #ffe033, #d4a017);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(255, 215, 0, 0.3);
+}
+
+.nav-button:active {
+    transform: translateY(1px);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+#post-login-menu-view {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+}
