@@ -496,7 +496,7 @@ function playAgain() {
     
     // Start new round
     gameState.roundNumber++;
-    if (els.roundId) els.roundId.textContent = `#${gameState.roundNumber}`;
+    // if (els.roundId) els.roundId.textContent = `#${gameState.roundNumber}`;
     
     initializeRound();
 }
@@ -517,7 +517,7 @@ function stopWatching() {
         
         // Start new round
         gameState.roundNumber++;
-        if (els.roundId) els.roundId.textContent = `#${gameState.roundNumber}`;
+        // if (els.roundId) els.roundId.textContent = `#${gameState.roundNumber}`;
         
         initializeRound();
     }
@@ -610,7 +610,7 @@ function endRound() {
     gameState.phase = 'finished';
     gameState.roundNumber++;
     
-    if (els.roundId) els.roundId.textContent = `#${gameState.roundNumber}`;
+    // if (els.roundId) els.roundId.textContent = `#${gameState.roundNumber}`;
     
     // Reset for next round
     setTimeout(() => {
