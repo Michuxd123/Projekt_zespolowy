@@ -1,215 +1,529 @@
+:root {
+    --bg-dark: #111111;  
+    --bg-card: #1e1e1e;
+    --gold: #ffc107; 
+    --gold-hover: #ffdb4d;
+    --text-main: #ffffff;  
+    --text-muted: #aaaaaa;
+    --danger: #ff4444;
+    --font-stack: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    background-color: #f0f0f0;
+    background-color: var(--bg-dark); 
+    color: var(--text-main);
+    font-family: var(--font-stack);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    background-image: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
 }
 
-/* Klasy do zarządzania widokami */
-.view {
-    padding: 20px;
-    border: 1px solid #ccc;
-    margin-top: 20px;
-}
-
-.hidden {
-    display: none;
-}
-
-.active {
-    display: block; /* Lub display: flex, grid itp. */
-}
-
-header {
-    background-color: #333;
-    color: white;
-    padding: 10px;
+#main-header {
+    width: 100%;
+    background-color: #151515;
+    border-bottom: 2px solid var(--gold);
+    padding: 15px 30px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
-#slot-machine {
+#user-info {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+}
+
+#username-display { color: #fff; font-weight: bold; }
+#money-display { color: var(--gold); font-weight: bold; font-size: 1.3rem; margin-left: 5px; }
+
+#main-nav button {
+    background: transparent;
+    border: 1px solid #444;
+    color: #ccc;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 10px;
+    transition: 0.3s;
+}
+
+#main-nav button:hover {
+    border-color: var(--gold);
+    color: var(--gold);
+}
+
+#logout-button {
+    border-color: var(--danger) !important;
+    color: var(--danger) !important;
+}
+#logout-button:hover {
+    background-color: var(--danger) !important;
+    color: white !important;
+}
+
+main {
+    width: 100%;
+    max-width: 1200px;
+    padding: 40px 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.view.hidden { display: none !important; }
+
+#post-login-menu-view h2 {
+    text-align: center;
+    color: var(--gold);
+    font-size: 2.5rem;
+    margin-bottom: 40px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.lobby-container {
     display: flex;
     justify-content: center;
-    margin: 20px 0;
+    gap: 40px;
+    flex-wrap: wrap;
+    width: 100%;
 }
 
-.reel {
-    font-size: 3rem;
+.lobby-card {
+    background-color: var(--bg-card);
+    width: 300px;
+    height: 380px;
+    border-radius: 15px;
+    border: 2px solid #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     padding: 20px;
-    border: 2px solid #555;
-    background: white;
-    width: 80px;
-    height: 80px;
-    margin: 0 5px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* Ważne: dodaj płynne przejście, gdy animacja się kończy */
-    transition: filter 0.3s ease-out, transform 0.3s ease-out;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-/* To jest KLUCZ do animacji CSS! 
-  Te style zostaną zastosowane tylko wtedy, gdy bęben ma klasę .spinning
-*/
-.reel.spinning {
-    /* 1. Rozmycie symulujące ruch */
-    filter: blur(3px);
-    
-    /* 2. Lekkie trzęsienie góra-dół */
-    animation: shake 0.08s linear infinite;
-    
-    /* 3. Dodatkowe efekty wizualne */
-    background: linear-gradient(45deg, #ffeb3b, #ff9800);
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(255, 193, 7, 0.3);
-}
-
-/* Definicja animacji "trzęsienia" */
-@keyframes shake {
-    0% {
-        transform: translateY(-3px) rotate(-1deg);
-    }
-    25% {
-        transform: translateY(3px) rotate(1deg);
-    }
-    50% {
-        transform: translateY(-2px) rotate(-0.5deg);
-    }
-    75% {
-        transform: translateY(2px) rotate(0.5deg);
-    }
-    100% {
-        transform: translateY(-3px) rotate(-1deg);
-    }
-}
-
-/* Animacja wygranej */
-.reel.win {
-    animation: winPulse 0.6s ease-in-out;
-    background: linear-gradient(45deg, #4caf50, #8bc34a);
-    box-shadow: 0 0 20px rgba(76, 175, 80, 0.5);
-}
-
-@keyframes winPulse {
-    0% {
-        transform: scale(1);
-    }
-    50% {
-        transform: scale(1.2);
-    }
-    100% {
-        transform: scale(1);
-    }
-}
-
-/* Style dla reszty interfejsu */
-
-#slot-controls {
-    margin-top: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-}
-
-#slot-controls label {
-    font-weight: bold;
-    color: #333;
-}
-
-#slot-controls input {
-    padding: 8px;
-    border: 2px solid #ddd;
-    border-radius: 4px;
-    width: 80px;
+    cursor: pointer;
+    transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
     text-align: center;
 }
 
-#slot-controls button {
-    padding: 10px 20px;
-    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+.lobby-card:hover { transform: translateY(-10px); }
+
+.lobby-card .icon { font-size: 5rem; margin-bottom: 20px; }
+.lobby-card h3 { font-size: 1.8rem; margin-bottom: 10px; text-transform: uppercase; }
+.lobby-card p { color: #888; margin-bottom: 30px; font-size: 0.9rem; }
+
+.lobby-card button.nav-button {
+    pointer-events: none;
+    background-color: transparent;
+    border: 2px solid white;
     color: white;
-    border: none;
-    border-radius: 25px;
-    font-size: 16px;
+    padding: 10px 30px;
+    border-radius: 20px;
     font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    text-transform: uppercase;
 }
 
-#slot-controls button:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+.play-card { border-color: var(--gold); }
+.play-card h3 { color: var(--gold); }
+.play-card:hover { box-shadow: 0 0 30px rgba(255, 193, 7, 0.2); }
+.play-card button { background-color: var(--gold); border-color: var(--gold); color: black; }
+
+.rank-card { border-color: #4a90e2; }
+.rank-card h3 { color: #4a90e2; }
+.rank-card:hover { box-shadow: 0 0 30px rgba(74, 144, 226, 0.2); }
+.rank-card button { border-color: #4a90e2; color: #4a90e2; }
+
+#main-menu-view {
+    width: 100%;
+    max-width: 1000px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-#slot-controls button:disabled {
-    background: #ccc;
-    cursor: not-allowed;
-    transform: none;
+#main-menu-view h2 {
+    text-align: center;
+    color: var(--gold);
+    margin-bottom: 40px;
+    font-size: 2.5rem;
+    text-transform: uppercase;
+    text-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
 }
 
-#slot-result-message {
-    font-size: 18px;
-    font-weight: bold;
-    margin-top: 15px;
-    min-height: 25px;
-    color: #333;
+.games-grid {
+    display: flex;
+    flex-wrap: wrap; 
+    justify-content: center; 
+    gap: 25px;
+    width: 100%;
 }
 
 .game-button {
-    padding: 15px 30px;
-    margin: 10px;
-    background: linear-gradient(45deg, #4ecdc4, #44a08d);
+    background: linear-gradient(145deg, #1e1e1e, #141414);
     color: white;
-    border: none;
-    border-radius: 25px;
-    font-size: 18px;
-    font-weight: bold;
+    width: 260px;
+    height: 180px;
+    
+    border: 1px solid #333;
+    border-radius: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
     cursor: pointer;
-    transition: all 0.3s ease;
+}
+
+.game-button .game-icon {
+    font-size: 3.5rem;
+    margin-bottom: 15px;
+    transition: transform 0.3s;
+}
+
+.game-button .game-info h3 {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: var(--gold);
+    margin-bottom: 5px;
+    text-transform: uppercase;
+}
+
+.game-button .game-info span {
+    font-size: 0.8rem;
+    color: #888;
+    font-weight: normal;
+    text-transform: none;
 }
 
 .game-button:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    transform: translateY(-8px);
+    border-color: var(--gold);
+    box-shadow: 0 15px 30px rgba(255, 193, 7, 0.1);
+    background: #252525;
 }
 
-#main-menu-view {
-    text-align: center;
-    padding: 40px 20px;
+.game-button:hover .game-icon {
+    transform: scale(1.2) rotate(5deg);
 }
+.game-button:hover .game-info span { color: white; }
 
 #login-view {
+    background-color: var(--bg-card);
+    padding: 50px;
+    border-radius: 15px;
+    border: 1px solid #333;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+    width: 100%;
+    max-width: 450px;
+    margin-top: 50px;
     text-align: center;
-    padding: 40px 20px;
-    max-width: 400px;
-    margin: 0 auto;
 }
 
+#login-view h2 { color: var(--gold); margin-bottom: 30px; }
+
 #login-view input {
+    width: 100%;
     padding: 12px;
-    margin: 10px;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    width: 200px;
-    font-size: 16px;
+    background: #111;
+    border: 1px solid #444;
+    color: white;
+    border-radius: 5px;
+    margin-bottom: 20px;
 }
 
 #login-view button {
-    padding: 12px 25px;
-    background: linear-gradient(45deg, #667eea, #764ba2);
-    color: white;
-    border: none;
-    border-radius: 25px;
-    font-size: 16px;
+    width: 100%;
+    padding: 12px;
+    background: var(--gold);
+    color: black;
     font-weight: bold;
+    border: none;
+    border-radius: 5px;
     cursor: pointer;
-    transition: all 0.3s ease;
+}
+#login-view button:hover { background: var(--gold-hover); }
+.error { color: var(--danger); margin-top: 15px; }
+
+table {
+    width: 80%; 
+    margin: 0 auto; 
+    border-collapse: collapse;
+    font-family: sans-serif;
+    color: #fff;
 }
 
-#login-view button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+th {
+    background-color: #333;
+    padding: 12px;
+    border-bottom: 2px solid #ffd700; 
 }
+
+td {
+    padding: 10px;
+    border-bottom: 1px solid #444;
+}
+
+td:nth-child(1) { text-align: center; color: #888; font-weight: bold; } 
+td:nth-child(2) { text-align: left; padding-left: 20px; } 
+td:nth-child(3) { text-align: right; color: #4caf50; font-family: monospace; font-size: 1.1em; } 
+
+tr:nth-child(1) td:nth-child(1) { color: #FFD700; font-size: 1.5em; } 
+tr:nth-child(2) td:nth-child(1) { color: #C0C0C0; font-size: 1.3em; } 
+tr:nth-child(3) td:nth-child(1) { color: #CD7F32; font-size: 1.2em; } 
+
+#slot-machine {
+    display: flex;             
+    justify-content: center;   
+    gap: 20px;                 
+    background-color: #222;    
+    padding: 30px;
+    border: 4px solid #ffd700; 
+    border-radius: 15px;      
+    width: fit-content;        
+    margin: 30px auto;         
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); 
+}
+
+.reel {
+    font-size: 5rem;           
+    background-color: #000;    
+    width: 120px;              
+    height: 120px;             
+    display: flex;
+    align-items: center;       
+    justify-content: center;   
+    border: 2px solid #555;    
+    border-radius: 10px;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); 
+}
+
+#slot-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+#slot-controls label {
+    font-size: 1.2rem;
+    color: #fff;
+}
+
+#bet-amount {
+    padding: 10px;
+    font-size: 1.2rem;
+    text-align: center;
+    background-color: #333;
+    border: 2px solid #ffd700;
+    color: #ffd700;
+    border-radius: 5px;
+    width: 100px;
+}
+
+#spin-button {
+    background-color: #ffd700; 
+    color: #000;               
+    border: none;
+    padding: 12px 30px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: transform 0.1s, background-color 0.2s;
+    box-shadow: 0 4px 0 #b8860b; 
+}
+
+#spin-button:hover {
+    background-color: #ffed4a; 
+    transform: translateY(-2px);
+}
+
+#spin-button:active {
+    transform: translateY(2px);  
+    box-shadow: 0 1px 0 #b8860b;
+}
+
+
+#slot-result-message {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-top: 20px;
+    min-height: 40px; 
+    color: #ffd700;
+}
+
+#blackjack-game-view > div {
+    display: flex;
+    justify-content: center;
+    align-items: center; 
+    gap: 15px; 
+    margin: 20px 0; 
+    flex-wrap: wrap; 
+}
+
+#blackjack-game-view label {
+    font-size: 1.3rem;
+    font-weight: bold;
+    color: #fff;
+    margin: 0; 
+    line-height: 1; 
+}
+
+#blackjack-game-view input[type="number"] {
+    height: 45px; 
+    width: 100px;
+    font-size: 1.3rem;
+    padding: 0 10px;
+    box-sizing: border-box; 
+    margin: 0; 
+    border: 2px solid #ffd700;
+    background: #111;
+    color: #ffd700;
+    border-radius: 8px;
+    text-align: center;
+}
+
+#blackjack-game-view h3 {
+    margin-top: 10px;
+    margin-bottom: 20px; 
+    font-size: 1.6rem;
+    text-shadow: 0 2px 5px #000;
+    letter-spacing: 1px; 
+}
+
+#blackjack-game-view button {
+    height: 45px; 
+    line-height: 1; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(145deg, #ffd700, #b8860b);
+    color: #000;
+    font-weight: bold;
+    border: none;
+    padding: 0 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+#blackjack-game-view button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(255, 215, 0, 0.4);
+}
+
+
+#roulette-spin-button, 
+#roulette-clear-bets {
+    background: linear-gradient(145deg, #ffd700, #b8860b) !important; 
+    color: #000 !important;             
+    border: 2px solid #b8860b !important;
+    text-shadow: none !important;       
+    opacity: 1 !important;              
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5) !important;
+    font-weight: bold !important;
+    text-transform: uppercase !important;
+    cursor: pointer !important;
+}
+
+#roulette-spin-button:hover, 
+#roulette-clear-bets:hover {
+    background: linear-gradient(145deg, #ffe033, #d4a017) !important; 
+    transform: translateY(-2px);
+}
+
+#roulette-spin-button:active, 
+#roulette-clear-bets:active {
+    transform: translateY(1px);
+}
+
+
+.bet-option {
+    transition: all 0.2s ease; 
+    border: 1px solid rgba(255, 255, 255, 0.1); 
+}
+
+.bet-option:hover {
+    background-color: transparent !important; 
+    box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.6), 0 0 10px rgba(255, 215, 0, 0.4) !important; 
+    border-color: #ffd700 !important; 
+    z-index: 10; 
+    transform: scale(1.05); 
+    cursor: pointer;
+}
+
+
+.bet-option.red:hover {
+    background-color: #ff4444 !important;
+}
+
+.bet-option.black:hover {
+    background-color: #444 !important;
+}
+
+#roulette-bet-amount {
+    background-color: #111 !important;
+    border: 2px solid #ffd700 !important;
+    color: #ffd700 !important;
+    font-weight: bold !important;
+    text-align: center !important;
+}
+
+.chip {
+    box-shadow: 0 0 5px #000;
+    border: 2px dashed #fff; 
+}
+
+#poker-game-view, 
+.poker-container {
+    background: transparent !important; 
+    background-color: transparent !important;
+    border: none !important; 
+    box-shadow: none !important;
+}
+
+#game-table {
+    border: 5px solid #3e2723; 
+    border-radius: 50px;       
+    box-shadow: 0 0 30px rgba(0,0,0,0.8); 
+    margin: 20px auto;         
+    max-width: 900px;          
+}
+
+
+#setup-screen {
+    background-color: #111 !important; 
+    color: #ffd700 !important;         
+    border: 2px solid #ffd700;         
+    border-radius: 15px;
+    padding: 30px;
+    max-width: 500px;
+    margin: 40px auto;
+}
+
+#setup-screen input {
+    background-color: #222;
+    border: 1px solid #ffd700;
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+}
+

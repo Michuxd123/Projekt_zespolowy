@@ -32,12 +32,12 @@
     background-color: white;
     padding: 15px;
     border-radius: 10px;
-    color: black;
+    color: rgb(247, 244, 244);
     margin-top: 50px;
 }
 
 #setup-screen h1 {
-    color: black;
+    color: rgb(245, 242, 242);
 }
 
 #game-table {
