@@ -207,7 +207,23 @@ function initializeRoulette() {
     clearButton.addEventListener('click', clearBets);
     spinButton.addEventListener('click', handleSpin);
     
+    // Info button handlers
+    const infoBtn = document.getElementById('roulette-info-btn');
+    const closeRulesBtn = document.getElementById('close-roulette-rules-btn');
+    
+    if (infoBtn) {
+        infoBtn.addEventListener('click', toggleRouletteRules);
+    }
+    
+    if (closeRulesBtn) {
+        closeRulesBtn.addEventListener('click', toggleRouletteRules);
+    }
+    
     clearBets(); 
+}
+
+function toggleRouletteRules() {
+    document.body.classList.toggle('roulette-rules-open');
 }
 
 initializeRoulette();

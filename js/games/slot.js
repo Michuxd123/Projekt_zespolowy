@@ -23,9 +23,24 @@ const reel3 = document.getElementById('reel3');
 const spinButton = document.getElementById('spin-button');
 const betInput = document.getElementById('bet-amount');
 const messageEl = document.getElementById('slot-result-message');
+const infoBtn = document.getElementById('slot-info-btn');
+const closeRulesBtn = document.getElementById('close-slot-rules-btn');
 
 // Nasłuchiwanie na kliknięcie przycisku "Zakręć"
 spinButton.addEventListener('click', spin);
+
+// Nasłuchiwanie na przycisk info
+if (infoBtn) {
+    infoBtn.addEventListener('click', toggleSlotRules);
+}
+
+if (closeRulesBtn) {
+    closeRulesBtn.addEventListener('click', toggleSlotRules);
+}
+
+function toggleSlotRules() {
+    document.body.classList.toggle('slot-rules-open');
+}
 
 function spin() {
     // 1. Pobierz dane gracza (z localStorage)

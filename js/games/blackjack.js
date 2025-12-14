@@ -19,6 +19,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const newRoundBtn = document.getElementById("blackjack-new-round");
     const hitBtn = document.getElementById("hit");
     const stayBtn = document.getElementById("stay");
+    const infoBtn = document.getElementById("blackjack-info-btn");
+    const closeRulesBtn = document.getElementById("close-blackjack-rules-btn");
 
     if (newRoundBtn) newRoundBtn.addEventListener("click", startNewRound);
     if (hitBtn) hitBtn.addEventListener("click", hit);
@@ -26,7 +28,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (hitBtn) hitBtn.disabled = true;
     if (stayBtn) stayBtn.disabled = true;
+
+    // Info button handlers
+    if (infoBtn) {
+        infoBtn.addEventListener('click', toggleBlackjackRules);
+    }
+
+    if (closeRulesBtn) {
+        closeRulesBtn.addEventListener('click', toggleBlackjackRules);
+    }
 });
+
+function toggleBlackjackRules() {
+    document.body.classList.toggle('blackjack-rules-open');
+}
 
 function ensureBetControls() {
     const gameView = document.getElementById("blackjack-game-view");

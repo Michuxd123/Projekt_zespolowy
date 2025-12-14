@@ -56,6 +56,10 @@
         </section>
         
         <section id="roulette-game-view" class="view hidden">
+            <button id="roulette-info-btn" class="info-toggle">
+                <span>i</span>
+            </button>
+            
             <h2>Gra - Ruletka </h2>
 
             <div id="roulette-wheel-area">
@@ -95,6 +99,70 @@
             <p id="roulette-message"></p>
         </section>
 
+        <div id="roulette-rules-sidebar" class="roulette-rules-panel">
+            <div class="roulette-rules-content">
+                <h2>Ruletka - Zasady i Mnożniki</h2>
+                <p>Wybierz typ zakładu, postaw stawkę i zakręć kołem. Wygrywasz, jeśli trafisz na wybraną opcję!</p>
+                
+                <h3>Typy zakładów i mnożniki:</h3>
+                <ul class="roulette-payouts">
+                    <li class="payout-item">
+                        <div class="payout-info">
+                            <strong>Pojedyncza liczba (0-36)</strong>
+                            <span>36x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-info">
+                            <strong>Kolumna (Kol. 1, 2, 3)</strong>
+                            <span>3x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-info">
+                            <strong>Tuzin (1st 12, 2nd 12, 3rd 12)</strong>
+                            <span>3x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-info">
+                            <strong>Kolor (Czerwone / Czarne)</strong>
+                            <span>2x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-info">
+                            <strong>Połowa (1-18 / 19-36)</strong>
+                            <span>2x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-info">
+                            <strong>Parzyste / Nieparzyste</strong>
+                            <span>2x zakład</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <h3>Przebieg rozgrywki:</h3>
+                <ol>
+                    <li>Wybierz typ zakładu (kliknij na odpowiednie pole)</li>
+                    <li>Ustaw wysokość zakładu</li>
+                    <li>Kliknij "Zakręć!" aby rozpocząć</li>
+                    <li>Jeśli trafisz, wygrywasz zgodnie z mnożnikiem</li>
+                </ol>
+
+                <h3>Przykłady:</h3>
+                <ul>
+                    <li>Zakład 10$ na liczbę 7 → wygrana: 360$ (10 × 36)</li>
+                    <li>Zakład 10$ na kolor czerwony → wygrana: 20$ (10 × 2)</li>
+                    <li>Zakład 10$ na kolumnę 1 → wygrana: 30$ (10 × 3)</li>
+                </ul>
+                
+                <button id="close-roulette-rules-btn" class="close-rules">Zamknij</button>
+            </div>
+        </div>
+
         <section id="leaderboard-view" class="view hidden">
             <h2>Ranking</h2>
             <div id="leaderboard-container">
@@ -103,6 +171,10 @@
         </section>
 
         <section id="slot-game-view" class="view hidden">
+            <button id="slot-info-btn" class="info-toggle">
+                <span>i</span>
+            </button>
+            
             <h2>Gra - Automat 🎰</h2>
             
             <div id="slot-machine">
@@ -120,7 +192,78 @@
             <p id="slot-result-message"></p>
         </section>
 
+        <div id="slot-rules-sidebar" class="slot-rules-panel">
+            <div class="slot-rules-content">
+                <h2>Automat - Mnożniki Wyplatności</h2>
+                <p>Kombinacje wygrywające i ich mnożniki w zależności od wysokości zakładu:</p>
+                
+                <h3>Trzy jednakowe symbole:</h3>
+                <ul class="slot-payouts">
+                    <li class="payout-item">
+                        <div class="payout-symbols">7️⃣ 7️⃣ 7️⃣</div>
+                        <div class="payout-info">
+                            <strong>Trzy Siódemki</strong>
+                            <span>50x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-symbols">🔔 🔔 🔔</div>
+                        <div class="payout-info">
+                            <strong>Trzy Dzwonki</strong>
+                            <span>20x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-symbols">🍉 🍉 🍉</div>
+                        <div class="payout-info">
+                            <strong>Trzy Arbuzy</strong>
+                            <span>16x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-symbols">🍒 🍒 🍒</div>
+                        <div class="payout-info">
+                            <strong>Trzy Wiśnie</strong>
+                            <span>4x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-symbols">🍋 🍋 🍋</div>
+                        <div class="payout-info">
+                            <strong>Trzy Cytryny</strong>
+                            <span>4x zakład</span>
+                        </div>
+                    </li>
+                    <li class="payout-item">
+                        <div class="payout-symbols">💎 💎 💎</div>
+                        <div class="payout-info">
+                            <strong>Trzy Diamenty</strong>
+                            <span>4x zakład</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <h3>Kombinacje specjalne:</h3>
+                <ul class="slot-payouts">
+                    <li class="payout-item">
+                        <div class="payout-symbols">💎 💎 ?</div>
+                        <div class="payout-info">
+                            <strong>Dwa Diamenty</strong>
+                            <span>2x zakład</span>
+                        </div>
+                    </li>
+                </ul>
+
+                <p class="slot-note"><strong>Uwaga:</strong> Wszystkie wygrane są obliczane na podstawie wysokości zakładu. Na przykład, jeśli postawisz 10$ i otrzymasz trzy siódemki, wygrywasz 500$ (10 × 50).</p>
+                
+                <button id="close-slot-rules-btn" class="close-rules">Zamknij</button>
+            </div>
+        </div>
+
         <section id="blackjack-game-view" class="view hidden">
+            <button id="blackjack-info-btn" class="info-toggle">
+                <span>i</span>
+            </button>
             <h3>Blackjack ♠️</h3>
             <h3>Dealer: <span id="dealer-sum"></span></h3>
             <div id="dealer-cards">
@@ -139,6 +282,47 @@
             <p id="results"></p>
             
         </section>
+
+        <div id="blackjack-rules-sidebar" class="blackjack-rules-panel">
+            <div class="blackjack-rules-content">
+                <h2>Blackjack - Zasady Gry</h2>
+                <p>Celem gry jest uzyskanie sumy kart jak najbliższej 21, ale nie przekraczającej tej wartości.</p>
+                
+                <h3>Przebieg rozgrywki:</h3>
+                <ol>
+                    <li>Postaw zakład i rozpocznij nową rundę</li>
+                    <li>Otrzymujesz 2 karty, krupier również (jedna zakryta)</li>
+                    <li>Możesz dobrać więcej kart (Dobierz) lub zatrzymać się (Stój)</li>
+                    <li>Jeśli przekroczysz 21, przegrywasz (Fura)</li>
+                    <li>Wygrywa ten, kto ma sumę bliższą 21</li>
+                </ol>
+
+                <h3>Wartości kart:</h3>
+                <ul>
+                    <li>Karty 2-10: wartość nominalna</li>
+                    <li>Walet, Dama, Król: 10 punktów</li>
+                    <li>As: 11 punktów (lub 1, jeśli przekroczenie 21)</li>
+                </ul>
+
+                <h3>Wyniki i wygrane:</h3>
+                <ul class="blackjack-payouts">
+                    <li class="payout-item">
+                        <strong>Wygrana:</strong> <span>2x zakład</span>
+                    </li>
+                    <li class="payout-item">
+                        <strong>Remis:</strong> <span>Zwrot zakładu</span>
+                    </li>
+                    <li class="payout-item">
+                        <strong>Przegrana (Fura):</strong> <span>Utrata zakładu</span>
+                    </li>
+                    <li class="payout-item">
+                        <strong>Blackjack (21):</strong> <span>Automatyczna wygrana</span>
+                    </li>
+                </ul>
+                
+                <button id="close-blackjack-rules-btn" class="close-rules">Zamknij</button>
+            </div>
+        </div>
 
         <section id="poker-game-view" class="view hidden">
             <div class="poker-container">
@@ -349,6 +533,10 @@
 </div>
 
 <section id="mines-game-view" class="view hidden">
+    <button id="mines-info-btn" class="info-toggle">
+        <span>i</span>
+    </button>
+    
     <h2>Gra - Mines 💣</h2>
     
     <div class="mines-layout">
@@ -394,6 +582,45 @@
         </div>
     </div>
 </section>
+
+        <div id="mines-rules-sidebar" class="mines-rules-panel">
+            <div class="mines-rules-content">
+                <h2>Mines - Zasady Gry</h2>
+                <p>Gra polega na odkrywaniu bezpiecznych pól z diamentami, unikając min. Mnożnik rośnie z każdym odkrytym diamentem!</p>
+                
+                <h3>Przebieg rozgrywki:</h3>
+                <ol>
+                    <li>Wybierz stawkę i liczbę min (1-24)</li>
+                    <li>Kliknij "Graj" aby rozpocząć</li>
+                    <li>Klikaj na pola, aby odkrywać diamenty 💎</li>
+                    <li>Mnożnik rośnie z każdym odkrytym diamentem</li>
+                    <li>Możesz wypłacić w każdej chwili (przycisk "Wypłać")</li>
+                    <li>Trafienie na minę 💣 = przegrana całego zakładu</li>
+                </ol>
+
+                <h3>Jak działa mnożnik:</h3>
+                <ul>
+                    <li>Mnożnik zaczyna od 1.00x</li>
+                    <li>Z każdym odkrytym diamentem mnożnik rośnie</li>
+                    <li>Im więcej min, tym szybciej rośnie mnożnik</li>
+                    <li>Wygrana = stawka × aktualny mnożnik</li>
+                </ul>
+
+                <h3>Strategia:</h3>
+                <ul>
+                    <li><strong>Więcej min = wyższy mnożnik, ale większe ryzyko</strong></li>
+                    <li>Odkryj wszystkie bezpieczne pola = automatyczna wypłata</li>
+                    <li>Możesz wypłacić w każdej chwili, zanim trafisz na minę</li>
+                    <li>Pamiętaj: im dalej idziesz, tym większe ryzyko!</li>
+                </ul>
+
+                <h3>Przykład:</h3>
+                <p class="mines-note">Stawka: 10$, odkryto 5 diamentów, mnożnik: 2.50x<br>
+                <strong>Wygrana: 25$ (10 × 2.50)</strong></p>
+                
+                <button id="close-mines-rules-btn" class="close-rules">Zamknij</button>
+            </div>
+        </div>
 
     </main> 
     
